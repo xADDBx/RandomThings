@@ -8,7 +8,7 @@ namespace RandomThings {
         public static Settings settings = Main.settings;
 
         [HarmonyPatch(typeof(MasterTimer), nameof(MasterTimer.Update))]
-        private static class Calender_Add_Patch {
+        private static class MasterTimer_Update_Patch {
             private static void Prefix(MasterTimer __instance) {
                 if (settings.TimeMultiplier != 1f || settings.changedTimeMultiplier) {
                     __instance.TimeMultiplier = settings.TimeMultiplier;
