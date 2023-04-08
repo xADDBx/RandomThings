@@ -12,18 +12,15 @@
     <AssemblyName>RandomThings</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <Deterministic>true</Deterministic>
-    <TargetFrameworkProfile />
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
+    <Deterministic>false</Deterministic>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
-    <DebugType>pdbonly</DebugType>
+    <DebugType>portable</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\RandomThings\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
+    <ErrorReport>none</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -53,6 +50,7 @@
     </Reference>
     <Reference Include="AssemblyPublicizer, Version=1.0.2.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\AssemblyPublicizer.1.0.2\lib\net472\AssemblyPublicizer.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -79,7 +77,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Classes\Main.cs" />
-    <Compile Include="obj\Debug\.NETFramework,Version=v4.7.2.AssemblyAttributes.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Classes\Settings.cs" />
     <Compile Include="Classes\Tweaks.cs" />
@@ -92,14 +89,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="lib\Assembly-CSharp_public.hash" />
-    <None Include="obj\Debug\DesignTimeResolveAssemblyReferencesInput.cache" />
-    <None Include="obj\Debug\RandomThings.csproj.CopyComplete" />
-    <None Include="obj\Debug\RandomThings.csproj.CoreCompileInputs.cache" />
     <None Include="packages.config" />
     <None Include="packages\AssemblyPublicizer.1.0.2\.signature.p7s" />
     <None Include="packages\AssemblyPublicizer.1.0.2\AssemblyPublicizer.1.0.2.nupkg" />
     <None Include="packages\AssemblyPublicizer.1.0.2\build\AssemblyPublicizer.props" />
     <None Include="README.md" />
+    <None Include="zip-hash-sign.ps1" />
   </ItemGroup>
   <ItemGroup>
     <Content Include=".gitattributes" />
@@ -130,14 +125,11 @@
     <Content Include="bin\Debug\RandomThings\zh-Hans\Microsoft.Build.Utilities.Core.resources.dll" />
     <Content Include="bin\Debug\RandomThings\zh-Hant\Microsoft.Build.Utilities.Core.resources.dll" />
     <Content Include="lib\Assembly-CSharp_public.dll" />
-    <Content Include="obj\Debug\RandomThings.csproj.FileListAbsolute.txt" />
-    <Content Include="obj\Debug\RandomThings.dll" />
-    <Content Include="obj\Debug\RandomThings.pdb" />
     <Content Include="packages\AssemblyPublicizer.1.0.2\lib\net472\AssemblyPublicizer.dll" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include=".vs\RandomThings\v16\" />
-    <Folder Include="obj\Debug\TempPE\" />
+    <Folder Include="obj\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
@@ -152,4 +144,13 @@
     </ItemGroup>
     <PublicizeTask InputAssemblies="@(Assemblies)" OutputDir="$(SolutionDir)lib/" />
   </Target>
+  <PropertyGroup>
+    <PostBuildEvent>echo "$(TargetPath)" "&amp;gt;$(MagicalMixturePath)\Mods\$(ProjectName)\$(ProjectName).dll*"
+xcopy /Y "$(TargetPath)" "$(MagicalMixturePath)\Mods\$(ProjectName)\$(ProjectName).dll*"
+xcopy /Y "$(TargetDir)$(TargetName).pdb" "$(MagicalMixturePath)\Mods\$(ProjectName)\$(ProjectName).pdb*"
+xcopy /Y "$(ProjectDir)\Info.json" "$(MagicalMixturePath)\Mods\$(ProjectName)\Info.json*"
+cd "$(TargetDir)"
+powershell.exe -ExecutionPolicy Unrestricted -f "$(ProjectDir)zip-hash-sign.ps1"
+</PostBuildEvent>
+  </PropertyGroup>
 </Project>

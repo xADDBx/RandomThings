@@ -1,9 +1,5 @@
 ﻿using HarmonyLib;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
 using UnityEngine;
 using UnityModManagerNet;
 
@@ -43,6 +39,7 @@ namespace RandomThings {
                 settings.changedTimeMultiplier = true;
             GUILayout.Label(settings.TimeMultiplier.ToString(), GUILayout.ExpandWidth(false));
             GUILayout.EndHorizontal();
+            GUILayout.Label(GameStatsManager.Instance.GetStatsInAString());
         }
 
         static void OnSaveGUI(UnityModManager.ModEntry modEntry) {
