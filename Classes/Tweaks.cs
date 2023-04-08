@@ -1,7 +1,4 @@
 ﻿using HarmonyLib;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace RandomThings {
     internal static class Tweaks {
@@ -10,7 +7,7 @@ namespace RandomThings {
         [HarmonyPatch(typeof(MasterTimer), nameof(MasterTimer.Update))]
         private static class MasterTimer_Update_Patch {
             private static void Prefix(MasterTimer __instance) {
-                if (settings.TimeMultiplier != 1f || settings.changedTimeMultiplier) {
+                if (!__instance.IsFastForwardingTowardsTarget && (settings.TimeMultiplier != 1f || settings.changedTimeMultiplier)) {
                     __instance.TimeMultiplier = settings.TimeMultiplier;
                 }
             }
