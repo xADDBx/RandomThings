@@ -12,6 +12,8 @@
   * Though the game doesn't seem to save time and location, so you'll keep your progress (Inventory, ...) but time is back to beginning of the day and you spawn next to your bed.
   * **Beware** while I didn't encounter problems, the game is in Early Access and certainly doesn't expect Mods. Make sure to bear the risks in mind.
 * (***New Feature***) Added a toggle to show the game file stats and the global stats.
+![grafik](https://user-images.githubusercontent.com/62178123/230702634-49d28e94-b584-4eae-a60a-fae4f7cb2650.png)
+
 # v0.0.1
 * This is a supposed to be a Proof of Concept.
 * The idea was to use UMM to create a simple Mod. 
