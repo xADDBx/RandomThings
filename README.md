@@ -17,16 +17,16 @@
 * The idea was to use UMM to create a simple Mod. 
 * The mod in question basically adds a slider to make the game time pass more slowly (or faster if that's your heart desire).
 
-List of somewhat interesting classes:
-QuestTracker - seems to be the Quest Log
-Avatar - Player Character (and stats like movespeed gold etc.)
-ObiCharacter - Player Movement stuffs?
-MasterTimer - Game Time related stuff
-GameStatsManager - Tracks save and system wide stats; responsible for saving and loading system wide stats.
-SaveGame - Lower Level save class; takes care of I/O operations and seems to have OnSaved and OnLoaded Events
-SaveLoadManager - The interesting stuff, responsible for saving and loading every bit of save specific data. Might even include display of saves?
+# List of somewhat interesting classes:
+* QuestTracker - seems to be the Quest Log
+* Avatar - Player Character (and stats like movespeed gold etc.)
+* ObiCharacter - Player Movement stuffs?
+* MasterTimer - Game Time related stuff
+* GameStatsManager - Tracks save and system wide stats; responsible for saving and loading system wide stats.
+* SaveGame - Lower Level save class; takes care of I/O operations and seems to have OnSaved and OnLoaded Events
+* SaveLoadManager - The interesting stuff, responsible for saving and loading every bit of save specific data. Might even include display of saves?
 
-UMM Config:
+# UMM Config:
 <!-- 0.25.4 -->
 	<GameInfo Name="The Magical Mixture Mill">
 		<Folder>The Magical Mixture Mill</Folder>
