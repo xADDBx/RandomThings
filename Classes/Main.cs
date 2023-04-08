@@ -1,6 +1,5 @@
 ﻿using HarmonyLib;
 using System.Reflection;
-using UnityEngine;
 using UnityModManagerNet;
 using static ModKit.UI;
 
@@ -31,22 +30,15 @@ namespace RandomThings {
         }
 
         static void OnGUI(UnityModManager.ModEntry modEntry) {
-            GUILayout.BeginHorizontal();
-            GUILayout.Label("Time Multiplier", GUILayout.ExpandWidth(false));
-            GUILayout.Space(10);
-            var tmp = settings.TimeMultiplier;
-            settings.TimeMultiplier = GUILayout.HorizontalSlider(settings.TimeMultiplier, 0f, 10f, GUILayout.Width(300f));
-            if (settings.TimeMultiplier != tmp)
+            if (LogSlider("Time Multiplier", ref settings.TimeMultiplier, 0.00001f, 10, 1, 5, "", AutoWidth()))
                 settings.changedTimeMultiplier = true;
-            GUILayout.Label(settings.TimeMultiplier.ToString(), GUILayout.ExpandWidth(false));
-            GUILayout.EndHorizontal();
             ActionButton("Save", () => {
                 if (GameStatsManager.Instance != null && SaveLoadManager.Instance != null) {
                     GameStatsManager.Instance.TrySaveGameStatsToFile();
                     SaveLoadManager.Instance.TryWriteSaveGameDataToFile();
                 }
             });
-            GUILayout.Label(GameStatsManager.Instance.GetStatsInAString());
+            Label(GameStatsManager.Instance.GetStatsInAString(), AutoWidth());
         }
 
         static void OnSaveGUI(UnityModManager.ModEntry modEntry) {
