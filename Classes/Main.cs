@@ -2,6 +2,7 @@
 using System.Reflection;
 using UnityEngine;
 using UnityModManagerNet;
+using static ModKit.UI;
 
 namespace RandomThings {
     public class Main {
@@ -39,6 +40,12 @@ namespace RandomThings {
                 settings.changedTimeMultiplier = true;
             GUILayout.Label(settings.TimeMultiplier.ToString(), GUILayout.ExpandWidth(false));
             GUILayout.EndHorizontal();
+            ActionButton("Save", () => {
+                if (GameStatsManager.Instance != null && SaveLoadManager.Instance != null) {
+                    GameStatsManager.Instance.TrySaveGameStatsToFile();
+                    SaveLoadManager.Instance.TryWriteSaveGameDataToFile();
+                }
+            });
             GUILayout.Label(GameStatsManager.Instance.GetStatsInAString());
         }
 
