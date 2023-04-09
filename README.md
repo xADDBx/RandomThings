@@ -1,6 +1,10 @@
 # RandomThings
+# v0.1.2
+* Added sorting as custom buttons into Game interface.
+* Revamped code.
+* Game now sorts (chest and inventory) container on load.
 # v0.1.1
-* Added Interface listing all Inventory Items and adding a sort button in the Mod Menu
+* Added Interface listing all Inventory Items and adding a sort button in the Mod Menu.
 # v0.1.0
 * Changed GUI (now uses ModKit since it looks better and is more useful).
 * Time Multiplier now No Longer conflicts with fast forwards (Those endless nights...)

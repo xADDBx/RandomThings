@@ -1,6 +1,4 @@
-﻿using ModKit;
-
-namespace RandomThings {
+﻿namespace RandomThings {
     public static class Extensions {
 
         public static SolidResourceHolder getInventory(this InventoryGrid inv) {
@@ -43,7 +41,7 @@ namespace RandomThings {
         }
 
         public static string getName(this SolidResourceHolder.SlotData slot) {
-            return slot.ResourceInstance?.Name ?? "Empty".orange();
+            return slot.ResourceInstance?.Name ?? null;
         }
     }
 }

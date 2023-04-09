@@ -1,6 +1,6 @@
 ﻿using HarmonyLib;
 using ModKit.Utility;
-using System;
+using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 using UnityModManagerNet;
@@ -16,6 +16,7 @@ namespace RandomThings {
         public static bool Enabled;
         public static bool ModGUIShown = false;
         public static ModEntry.ModLogger Mod;
+        public static Dictionary<int, GameObject> objects = new();
         public static Settings settings;
         private static bool Load(ModEntry modEntry) {
             modEntry.OnToggle = OnToggle;
@@ -33,8 +34,8 @@ namespace RandomThings {
         }
 
         private static bool OnUnload(ModEntry modEntry) {
-            foreach (var k in Tweaks.customButtons.Keys) {
-                Tweaks.customButtons[k].SafeDestroy();
+            foreach (var k in objects.Keys) {
+                objects[k].SafeDestroy();
             }
             HarmonyInstance.UnpatchAll(modEntry.Info.Id);
             return true;
@@ -51,17 +52,78 @@ namespace RandomThings {
 
 
         static bool showGameStats = false;
+        static bool showInventories = false;
         static bool showDangerous = false;
         static Avatar player;
         static void OnGUI(ModEntry modEntry) {
             LogSlider("Time Multiplier", ref settings.TimeMultiplier, 0.00001f, 10, 1, 5, "", AutoWidth());
             if (SaveLoadManager.Instance != null) {
                 using (HorizontalScope()) {
+                    Label("Changes the Amount of saves (probably per Slot) to keep. Default 10. Games are deleted when loading a save.".Cyan());
+
                     ValueAdjustorEditable("", () => settings.saveGameChainFileCap, (v) => {
                         settings.saveGameChainFileCap = v;
                         applySaveChange();
-                    }, 1, 10, 50, AutoWidth());
-                    Label("Changes the Amount of saves (probably per Slot) to keep. Default 10. Games are deleted when loading a save.".Cyan());
+                    }, 1, 10, 50);
+                }
+            }
+            DisclosureToggle("Show Open Inventories", ref showInventories);
+            if (showInventories) {
+                using (HorizontalScope()) {
+                    Space(20);
+                    using (VerticalScope()) {
+                        if (player != null) {
+                            PlayerInput inp = player.PlayerInput;
+                            if (inp != null) {
+                                var menu = MainGameScript.Instance.MainCamera.transform.Find("--- REGULAR MENUS Sort Order 15/Menu - InventoryUI");
+                                foreach (Transform child in menu.transform) {
+                                    if (menu.gameObject.activeSelf) {
+                                        if (child.gameObject.activeSelf) {
+                                            // Only handle Player Inventory and Normal Chests
+                                            if (child.name.Equals("Chest Grid Container") || child.name.Equals("Avatar Inventory")) {
+                                                using (HorizontalScope()) {
+                                                    Label(child.name.Green(), Width(200));
+
+                                                    InventoryGrid inv = child.GetComponentInChildren<InventoryGrid>();
+                                                    var container = inv.getInventory();
+                                                    if (container == null) {
+                                                        Label("Please reopen the container!".Red());
+                                                    } else {
+                                                        if (container != null) {
+                                                            ActionButton("Sort Container", () => container.sort(), Width(120));
+                                                            Space(-320);
+                                                            using (VerticalScope()) {
+                                                                Label("");
+                                                                using (HorizontalScope()) {
+                                                                    Label("Name".Cyan(), Width(200));
+                                                                    Label("Amount".Cyan(), Width(50));
+                                                                    Space(-250);
+                                                                }
+                                                                foreach (var slot in container.GetCurrentSlots()) {
+                                                                    using (HorizontalScope()) {
+                                                                        string name = slot.getName();
+                                                                        if (name != null) {
+                                                                            Label(name.Cyan(), Width(200));
+                                                                            Label(slot.StackSize.ToString());
+                                                                        } else {
+                                                                            Label("Empty".Orange());
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        } else {
+                            player = MainGameScript.Instance.PlayerAvatar;
+                        }
+                    }
+
                 }
             }
             DisclosureToggle("Show Game Stats", ref showGameStats);
@@ -73,66 +135,17 @@ namespace RandomThings {
             }
             DisclosureToggle("Dangerous", ref showDangerous);
             if (showDangerous) {
-                using (HorizontalScope()) {
-                    Space(20);
-                    using (VerticalScope()) {
-                        if (player != null) {
-                            PlayerInput inp = player.PlayerInput;
-                            if (inp != null) {
-                                try {
-                                    var menu = MainGameScript.Instance.MainCamera.transform.Find("--- REGULAR MENUS Sort Order 15/Menu - InventoryUI");
-                                    foreach (Transform child in menu.transform) {
-                                        if (menu.gameObject.activeSelf) {
-                                            if (child.gameObject.activeSelf) {
-                                                using (HorizontalScope()) {
-                                                    Label(child.name.Green());
-                                                    if (child.name.Equals("Chest Grid Container") || child.name.Equals("Avatar Inventory")) {
-                                                        InventoryGrid inv = child.GetComponentInChildren<InventoryGrid>();
-                                                        var container = inv.getInventory();
-                                                        if (container == null) {
-                                                            Label("Please reopen the container!".Red());
-                                                        } else {
-                                                            ActionButton("Sort Container", () => container.sort());
-                                                            using (HorizontalScope()) {
-                                                                Space(20);
-                                                                if (container != null) {
-                                                                    using (VerticalScope()) {
-                                                                        foreach (var slot in container.GetCurrentSlots()) {
-                                                                            Label(slot.getName());
-                                                                        }
-                                                                    }
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        } else {
-                                            Label(child.name.Grey());
-                                        }
-
-                                    }
-                                } catch (NullReferenceException e) {
-                                    Mod.Error(e.ToString());
-                                }
-                            }
-                        } else {
-                            player = MainGameScript.Instance.PlayerAvatar;
-                        }
-                        ActionButton("Save", () => {
-                            if (GameStatsManager.Instance != null && SaveLoadManager.Instance != null) {
-                                GameStatsManager.Instance.TrySaveGameStatsToFile();
-                                SaveLoadManager.Instance.TryWriteSaveGameDataToFile();
-                            }
-                        });
+                ActionButton("Save", () => {
+                    if (GameStatsManager.Instance != null && SaveLoadManager.Instance != null) {
+                        GameStatsManager.Instance.TrySaveGameStatsToFile();
+                        SaveLoadManager.Instance.TryWriteSaveGameDataToFile();
                     }
-                }
+                });
             }
         }
 
         static void onStart() {
             applySaveChange();
-            Tweaks.customButtons = new();
         }
 
         static void applySaveChange() {
