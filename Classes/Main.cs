@@ -1,5 +1,7 @@
 ﻿using HarmonyLib;
+using ModKit;
 using ModKit.Utility;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
@@ -48,7 +50,6 @@ namespace RandomThings {
         static void OnSaveGUI(ModEntry modEntry) {
             settings.Save(modEntry);
         }
-
 
         static bool showGameStats = false;
         static bool showInventories = false;
@@ -151,6 +152,25 @@ namespace RandomThings {
 
         static void applySaveChange() {
             SaveLoadManager.Instance.SetFieldValue("_saveGameChainFileCap", settings.saveGameChainFileCap);
+        }
+
+        public static bool ValueAdjustorEditable(string title, Func<int> get, Action<int> set, int increment = 1, int min = 0, int max = int.MaxValue, params GUILayoutOption[] options) {
+            var changed = false;
+            using (HorizontalScope()) {
+                Label(title.cyan(), options);
+                Space(15);
+                var value = get();
+                changed = ValueAdjuster(ref value, increment, min, max);
+                if (changed) {
+                    set(Math.Max(Math.Min(value, max), min));
+                }
+                Space(50);
+                using (VerticalScope(Width(75))) {
+                    ActionIntTextField(ref value, set, Width(75));
+                    set(Math.Max(Math.Min(value, max), min));
+                }
+            }
+            return changed;
         }
     }
 }

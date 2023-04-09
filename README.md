@@ -9,6 +9,14 @@
 * DisclosureToggle to view opened inventories in the mod menu.
 * DisclosureToggle to view the Game Stats (save specific and system wide)
 
+# Installation
+* Get the latest version of [Unity Mod Manager](https://www.nexusmods.com/site/mods/21) (at least 0.25.5c)
+* Install the Manager for the game.
+  * See "How to Install" on the above linked page.
+* Download the latest release zip and install it with one of the following methods:
+  * (Prefered) Start UnityModManager.exe again. Make sure you still have the game selected. Switch to the Mods tab and drag the zip into the "Drop zip files here" field.
+  * Open the game folder. Enter the mods directory and unzip the mods archive there.
+
 # v0.1.3
 * Added different ways of sorting. The active one is chosen in the Mod Menu.
 * Added Toggles to turn on/off.
@@ -43,6 +51,21 @@
 * The idea was to use UMM to create a simple Mod. 
 * The mod in question basically adds a slider to make the game time pass more slowly (or faster if that's your heart desire).
 
+# Building
+* Since I moved from a custom ModKit installation to the Nugget the setup process should be relatively simple.
+  * Clone the repository. 
+  * Open the solution with Visual Studio.
+  * Make sure the Nuggets are installed as expected (should automatically setup; see packages.config for information concerning what packages and which versions are used.
+  * To ensure portability I use a system variable $(MagicalMixturePath) for references and the build script. If you want to build the project yourself you either:
+    * Add the variable yourself. 
+      * Go to Properties > Environment Variables (or just search for variables and pick the option that appears)
+      * Under User Variables click new, with the variable name being *MagicalMixturePath*
+      * and the value being your path to the game directory (something like *D:\Games\Steam\steamapps\common\The Magical Mixture Mill*.
+      * Here is an example on how the entry should look like (do remember to modify the path to the game directory depending on where it is located on your system
+      ![grafik](https://user-images.githubusercontent.com/62178123/230797697-bb7653bd-14b2-4717-8bbd-718ce068d3b3.png)
+    * Replace every reference to the variable in the .csproj file with the path. I don't really recommend doing that.
+  * Now you should be able to build the project without problems. If you still encounter trouble please contact me on Discord or create a GitHub issue.
+
 # List of somewhat interesting classes:
 * QuestTracker - seems to be the Quest Log
 * Avatar - Player Character (and stats like movespeed gold etc.)
@@ -51,6 +74,3 @@
 * GameStatsManager - Tracks save and system wide stats; responsible for saving and loading system wide stats.
 * SaveGame - Lower Level save class; takes care of I/O operations and seems to have OnSaved and OnLoaded Events
 * SaveLoadManager - The interesting stuff, responsible for saving and loading every bit of save specific data. Might even include display of saves?
-
-# UMM Config:
-As of 0.25.5c the game is in included in UMM and doesn't need a custom config.
