@@ -3,7 +3,6 @@ using ModKit.Utility;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
-using UnityModManagerNet;
 using static ModKit.UI;
 using static UnityModManagerNet.UnityModManager;
 
@@ -54,7 +53,6 @@ namespace RandomThings {
         static bool showGameStats = false;
         static bool showInventories = false;
         static bool showDangerous = false;
-        static Avatar player;
         static void OnGUI(ModEntry modEntry) {
             LogSlider("Time Multiplier", ref settings.TimeMultiplier, 0.00001f, 10, 1, 5, "", AutoWidth());
             if (SaveLoadManager.Instance != null) {
@@ -72,44 +70,37 @@ namespace RandomThings {
                 using (HorizontalScope()) {
                     Space(20);
                     using (VerticalScope()) {
-                        if (player != null) {
-                            PlayerInput inp = player.PlayerInput;
-                            if (inp != null) {
-                                var menu = MainGameScript.Instance.MainCamera.transform.Find("--- REGULAR MENUS Sort Order 15/Menu - InventoryUI");
-                                foreach (Transform child in menu.transform) {
-                                    if (menu.gameObject.activeSelf) {
-                                        if (child.gameObject.activeSelf) {
-                                            // Only handle Player Inventory and Normal Chests
-                                            if (child.name.Equals("Chest Grid Container") || child.name.Equals("Avatar Inventory")) {
-                                                using (HorizontalScope()) {
-                                                    Label(child.name.Green(), Width(200));
+                        var menu = MainGameScript.Instance.MainCamera.transform.Find("--- REGULAR MENUS Sort Order 15/Menu - InventoryUI");
+                        foreach (Transform child in menu.transform) {
+                            if (menu.gameObject.activeSelf) {
+                                if (child.gameObject.activeSelf) {
+                                    // Only handle Player Inventory and Normal Chests
+                                    if (child.name.Equals("Chest Grid Container") || child.name.Equals("Avatar Inventory")) {
+                                        using (HorizontalScope()) {
+                                            Label(child.name.Green(), Width(200));
 
-                                                    InventoryGrid inv = child.GetComponentInChildren<InventoryGrid>();
-                                                    var container = inv.getInventory();
-                                                    if (container == null) {
-                                                        Label("Please reopen the container!".Red());
-                                                    } else {
-                                                        if (container != null) {
-                                                            ActionButton("Sort Container", () => container.sort(), Width(120));
-                                                            Space(-320);
-                                                            using (VerticalScope()) {
-                                                                Label("");
-                                                                using (HorizontalScope()) {
-                                                                    Label("Name".Cyan(), Width(200));
-                                                                    Label("Amount".Cyan(), Width(50));
-                                                                    Space(-250);
-                                                                }
-                                                                foreach (var slot in container.GetCurrentSlots()) {
-                                                                    using (HorizontalScope()) {
-                                                                        string name = slot.getName();
-                                                                        if (name != null) {
-                                                                            Label(name.Cyan(), Width(200));
-                                                                            Label(slot.StackSize.ToString());
-                                                                        } else {
-                                                                            Label("Empty".Orange());
-                                                                        }
-                                                                    }
-                                                                }
+                                            InventoryGrid inv = child.GetComponentInChildren<InventoryGrid>();
+                                            var container = inv.getInventory();
+                                            if (container == null) {
+                                                Label("Please reopen the container!".Red());
+                                            } else {
+                                                ActionButton("Sort Container", () => container.sort(), Width(120));
+                                                Space(-320);
+                                                using (VerticalScope()) {
+                                                    Label("");
+                                                    using (HorizontalScope()) {
+                                                        Label("Name".Cyan(), Width(200));
+                                                        Label("Amount".Cyan(), Width(50));
+                                                        Space(-250);
+                                                    }
+                                                    foreach (var slot in container.GetCurrentSlots()) {
+                                                        using (HorizontalScope()) {
+                                                            string name = slot.getName();
+                                                            if (name != null) {
+                                                                Label(name.Cyan(), Width(200));
+                                                                Label(slot.StackSize.ToString());
+                                                            } else {
+                                                                Label("Empty".Orange());
                                                             }
                                                         }
                                                     }
@@ -119,11 +110,8 @@ namespace RandomThings {
                                     }
                                 }
                             }
-                        } else {
-                            player = MainGameScript.Instance.PlayerAvatar;
                         }
                     }
-
                 }
             }
             DisclosureToggle("Show Game Stats", ref showGameStats);
