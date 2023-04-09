@@ -3,7 +3,6 @@ using ModKit.Utility;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
-using UnityModManagerNet;
 using static ModKit.UI;
 using static UnityModManagerNet.UnityModManager;
 
@@ -98,7 +97,7 @@ namespace RandomThings {
                                             if (container == null) {
                                                 Label("Please reopen the container!".Red());
                                             } else {
-                                                ActionButton("Sort Container", () => container.sort(), Width(120));
+                                                ActionButton("Sort Container", () => container.sort(settings.sortMode), Width(120));
                                                 Space(-320);
                                                 using (VerticalScope()) {
                                                     Label("");
