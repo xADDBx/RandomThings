@@ -24,8 +24,9 @@
 * To ensure portability I use a system variable $(MagicalMixturePath) for references and the build script. If you want to build the project yourself you either:
   * Add the variable yourself. 
     * Go to Properties > Environment Variables (or just search for variables and pick the option that appears)
-    * Under User Variables click new, with the variable name being *MagicalMixturePath*
-    * and the value being your path to the game directory (something like *D:\Games\Steam\steamapps\common\The Magical Mixture Mill*.
+    * Under User Variables click new, with the variable name being *MagicalMixturePath* 
+      and the value being your path to the game directory 
+      e.g. *D:\Games\Steam\steamapps\common\The Magical Mixture Mill*.
     * Here is an example on how the entry should look like (do remember to modify the path to the game directory depending on where it is located on your system
     ![grafik](https://user-images.githubusercontent.com/62178123/230797697-bb7653bd-14b2-4717-8bbd-718ce068d3b3.png)
   * Replace every reference to the variable in the .csproj file with the path. I don't really recommend doing that.
