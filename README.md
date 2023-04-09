@@ -1,4 +1,14 @@
 # RandomThings
+# Features
+* Add multiplier for game time (not game speed).
+* Change the amount of backup saves the game keeps (default 10, maximum 50).
+* Toggle to add custom sort buttons in inventories.
+* Toggle to automatically sort containers when the game loads.
+* Toggle to automatically sort containers when they are opened.
+* Choose between 4 possible sort methods (By Name or By Total Resource Count; Ascending or Descending)
+* DisclosureToggle to view opened inventories in the mod menu.
+* DisclosureToggle to view the Game Stats (save specific and system wide)
+
 # v0.1.3
 * Added different ways of sorting. The active one is chosen in the Mod Menu.
 * Added Toggles to turn on/off.
@@ -6,6 +16,8 @@
   * Auto sort on game load.
   * Auto sort on opeining a container.
 * Known issue: Button Highlighting on Hover not working
+![grafik](https://user-images.githubusercontent.com/62178123/230792222-c6e1ecaf-27cd-432c-9ea2-3f37b97fdb4a.png)
+![grafik](https://user-images.githubusercontent.com/62178123/230792281-a56a4c8e-03d1-4401-9afa-9459bce85758.png)
 # v0.1.2
 * Added sorting as custom buttons into Game interface.
 * Revamped code.
@@ -41,14 +53,4 @@
 * SaveLoadManager - The interesting stuff, responsible for saving and loading every bit of save specific data. Might even include display of saves?
 
 # UMM Config:
-<!-- 0.25.4 -->
-	<GameInfo Name="The Magical Mixture Mill">
-		<Folder>The Magical Mixture Mill</Folder>
-		<ModsDirectory>Mods</ModsDirectory>
-		<ModInfo>Info.json</ModInfo>
-		<GameExe>The Magical Mixture Mill.exe</GameExe>
-		<EntryPoint>[UnityEngine.UIModule.dll]UnityEngine.Canvas.cctor:Before</EntryPoint>
-		<StartingPoint>[Assembly-CSharp.dll]MainMenu.Awake:Before</StartingPoint>
-		<UIStartingPoint>[Assembly-CSharp.dll]MainMenu.Start:After</UIStartingPoint>
-		<MinimalManagerVersion>0.25.4</MinimalManagerVersion>
-	</GameInfo>
+As of 0.25.5c the game is in included in UMM and doesn't need a custom config.
