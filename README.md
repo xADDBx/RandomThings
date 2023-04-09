@@ -1,4 +1,6 @@
 # RandomThings
+# v0.1.1
+* Added Interface listing all Inventory Items and adding a sort button in the Mod Menu
 # v0.1.0
 * Changed GUI (now uses ModKit since it looks better and is more useful).
 * Time Multiplier now No Longer conflicts with fast forwards (Those endless nights...)
@@ -8,8 +10,7 @@
   * This is by default 10 saves. I think this is per slot; but I'm unsure. They are deleted when a save game is actually loaded.
   * Since it seems like the game validates every save each time the game loads I limited the amount of saves you can keep (50 for now).
 * (***New Feature***) I added a save button. This saves both global game stats and creates a new local save.
-  * I didn't encounter any problems using this. 
-  * Though the game doesn't seem to save time and location, so you'll keep your progress (Inventory, ...) but time is back to beginning of the day and you spawn next to your bed.
+  * It seems to save stats and inventory at least. You do respawn at the beginning of the day near your bed though
   * **Beware** while I didn't encounter problems, the game is in Early Access and certainly doesn't expect Mods. Make sure to bear the risks in mind.
 * (***New Feature***) Added a toggle to show the game file stats and the global stats.
 ![grafik](https://user-images.githubusercontent.com/62178123/230702634-49d28e94-b584-4eae-a60a-fae4f7cb2650.png)

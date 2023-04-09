@@ -61,12 +61,20 @@
       <HintPath>packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Rewired_Core">
+      <HintPath>..\..\..\Games\Steam\steamapps\common\The Magical Mixture Mill\The Magical Mixture Mill_Data\Managed\Rewired_Core.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="Unity.TextMeshPro">
+      <HintPath>..\..\..\Games\Steam\steamapps\common\The Magical Mixture Mill\The Magical Mixture Mill_Data\Managed\Unity.TextMeshPro.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="UnityEngine">
       <HintPath>$(MagicalMixturePath)\The Magical Mixture Mill_Data\Managed\UnityEngine.dll</HintPath>
       <Private>False</Private>
@@ -87,12 +95,17 @@
       <HintPath>..\..\..\Games\Steam\steamapps\common\The Magical Mixture Mill\The Magical Mixture Mill_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>..\..\..\Games\Steam\steamapps\common\The Magical Mixture Mill\The Magical Mixture Mill_Data\Managed\UnityEngine.UI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="UnityModManager">
       <HintPath>..\..\..\Games\Steam\steamapps\common\The Magical Mixture Mill\The Magical Mixture Mill_Data\Managed\UnityModManager\UnityModManager.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Classes\Extensions.cs" />
     <Compile Include="Classes\Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Classes\Settings.cs" />
