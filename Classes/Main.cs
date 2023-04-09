@@ -3,6 +3,7 @@ using ModKit.Utility;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
+using UnityModManagerNet;
 using static ModKit.UI;
 using static UnityModManagerNet.UnityModManager;
 
@@ -64,6 +65,19 @@ namespace RandomThings {
                         applySaveChange();
                     }, 1, 10, 50);
                 }
+            }
+            if (Toggle("Show sort buttons in inventories", ref settings.showSortButtons)) {
+                foreach (var obj in objects.Values) {
+                    if (obj.name.Equals("CustomSortButton")) {
+                        obj.SetActive(settings.showSortButtons);
+                    }
+                }
+            }
+            Toggle("Sort containers on Game Load", ref settings.sortOnGameLoad);
+            Toggle("Sort containers when opening them", ref settings.sortContainerOnOpening);
+            int sortmode = (int)settings.sortMode;
+            if (ModKit.UI.SelectionGrid(ref sortmode, new string[] { "By Name Ascending", "By Name Descending", "By Resource Count Ascending", "By Resource Count Descending" }, 2)) {
+                settings.sortMode = (Extensions.SortMode)sortmode;
             }
             DisclosureToggle("Show Open Inventories", ref showInventories);
             if (showInventories) {

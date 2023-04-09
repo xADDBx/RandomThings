@@ -1,4 +1,11 @@
 # RandomThings
+# v0.1.3
+* Added different ways of sorting. The active one is chosen in the Mod Menu.
+* Added Toggles to turn on/off.
+  * Custom Sort Buttons in inventories.
+  * Auto sort on game load.
+  * Auto sort on opeining a container.
+* Known issue: Button Highlighting on Hover not working
 # v0.1.2
 * Added sorting as custom buttons into Game interface.
 * Revamped code.
