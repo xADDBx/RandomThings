@@ -3,6 +3,7 @@
 namespace RandomThings {
     public class Settings : UnityModManager.ModSettings {
         public float TimeMultiplier = 1f;
+        public int selectedTab = 0;
         public int saveGameChainFileCap = 10;
         public Extensions.SortMode sortMode = Extensions.SortMode.byNameAsc;
         public bool sortOnGameLoad = false;

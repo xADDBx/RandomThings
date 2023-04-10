@@ -3,8 +3,8 @@ using UnityEngine;
 using UnityEngine.UI;
 
 namespace RandomThings {
-    internal static class Tweaks {
-        public static Settings settings = Main.settings;
+    public static class Tweaks {
+        public static Settings settings => Main.settings;
 
         [HarmonyPatch(typeof(MasterTimer), nameof(MasterTimer.Update))]
         private static class MasterTimer_Update_Patch {

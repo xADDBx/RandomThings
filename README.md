@@ -20,7 +20,7 @@
 # Building
 * Clone the repository. 
 * Open the solution with Visual Studio.
-* Make sure the Nuggets are installed as expected. This should automatically happen but in case of problems see the packages.config file for information concerning what packages and which versions are used.
+* Make sure the Nuggets are installed as expected. This should automatically happen.
 * To ensure portability I use a system variable $(MagicalMixturePath) for references and the build script. If you want to build the project yourself you either:
   * Add the variable yourself. 
     * Go to Properties > Environment Variables (or just search for variables and pick the option that appears)
