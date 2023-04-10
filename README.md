@@ -28,8 +28,9 @@
       and the value being your path to the game directory 
       e.g. *D:\Games\Steam\steamapps\common\The Magical Mixture Mill*.
     * Here is an example on how the entry should look like. ***Do remember to modify the path to the game directory depending on where it is located on your system***.
+    
     ![grafik](https://user-images.githubusercontent.com/62178123/230797697-bb7653bd-14b2-4717-8bbd-718ce068d3b3.png)
-  * Replace every reference to the variable in the .csproj file with the path. I don't really recommend doing that.
+  * **Or** replace every reference to the variable in the .csproj file with the path. I don't really recommend doing that.
 * Now you should be able to build the project without problems. If you still encounter trouble please contact me on Discord or create a GitHub issue.
 
 # v0.1.3
