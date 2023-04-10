@@ -12,13 +12,13 @@ namespace RandomThings {
 #if DEBUG
     [EnableReloading]
 #endif
-    internal static class Main {
-        public static Harmony HarmonyInstance;
+    public class Main {
+        internal static Harmony HarmonyInstance;
         public static bool Enabled;
         public static ModEntry.ModLogger Mod;
         public static Dictionary<int, GameObject> objects = new();
         public static Settings settings;
-        public static bool Load(ModEntry modEntry) {
+        private static bool Load(ModEntry modEntry) {
             modEntry.OnToggle = OnToggle;
             modEntry.OnGUI = OnGUI;
             modEntry.OnSaveGUI = OnSaveGUI;
@@ -31,7 +31,7 @@ namespace RandomThings {
             return true;
         }
 
-        public static bool OnUnload(ModEntry modEntry) {
+        private static bool OnUnload(ModEntry modEntry) {
             foreach (var k in objects.Keys) {
                 objects[k].SafeDestroy();
             }
@@ -39,12 +39,12 @@ namespace RandomThings {
             return true;
         }
 
-        public static bool OnToggle(ModEntry modEntry, bool value) {
+        private static bool OnToggle(ModEntry modEntry, bool value) {
             Enabled = value;
             return true;
         }
 
-        public static void OnSaveGUI(ModEntry modEntry) {
+        private static void OnSaveGUI(ModEntry modEntry) {
             settings.Save(modEntry);
         }
         public static void OnGUI(ModEntry modEntry) {
@@ -53,7 +53,7 @@ namespace RandomThings {
                 new NamedAction("Inventory", () => InventoryUI.OnGUI()),
                 new NamedAction("Other", () => OtherUI.OnGUI()));
         }
-        public static void onStart() {
+        private static void onStart() {
             applySaveChange();
         }
         public static void applySaveChange() {
