@@ -33,13 +33,15 @@
   * **Or** replace every reference to the variable in the .csproj file with the path. I don't really recommend doing that.
 * Now you should be able to build the project without problems. If you still encounter trouble please contact me on Discord or create a GitHub issue.
 
+# v0.1.4
+* Fixed a bug where sort on opening Container would affect more than just inventory and chests.
+* Known issue: Button Highlighting on Hover not working
 # v0.1.3
 * Added different ways of sorting. The active one is chosen in the Mod Menu.
 * Added Toggles to turn on/off.
   * Custom Sort Buttons in inventories.
   * Auto sort on game load.
   * Auto sort on opeining a container.
-* Known issue: Button Highlighting on Hover not working
 ![grafik](https://user-images.githubusercontent.com/62178123/230792222-c6e1ecaf-27cd-432c-9ea2-3f37b97fdb4a.png)
 ![grafik](https://user-images.githubusercontent.com/62178123/230792281-a56a4c8e-03d1-4401-9afa-9459bce85758.png)
 # v0.1.2

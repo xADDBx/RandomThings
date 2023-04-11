@@ -11,7 +11,7 @@ namespace RandomThings {
             if (SaveLoadManager.Instance != null) {
                 using (HorizontalScope()) {
                     Label("Changes the Amount of saves (probably per Slot) to keep. Default 10. Games are deleted when loading a save.".Cyan());
-                    GUIUtil.ValueAdjustorEditable("", () => settings.saveGameChainFileCap, (v) => {
+                    ValueAdjustorEditable("", () => settings.saveGameChainFileCap, (v) => {
                         settings.saveGameChainFileCap = v;
                         Main.applySaveChange();
                     }, 1, 10, 50);

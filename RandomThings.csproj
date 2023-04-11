@@ -122,7 +122,6 @@
     <Compile Include="Classes\UI\InventoryUI.cs" />
     <Compile Include="Classes\UI\OtherUI.cs" />
     <Compile Include="Classes\Util\Extensions.cs" />
-    <Compile Include="Classes\Util\GUIUtil.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Classes\Settings.cs" />
   </ItemGroup>
@@ -143,6 +142,9 @@
     </PropertyGroup>
     <Error Condition="!Exists('packages\AssemblyPublicizer.1.0.2\build\AssemblyPublicizer.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\AssemblyPublicizer.1.0.2\build\AssemblyPublicizer.props'))" />
   </Target>
+  <ItemGroup>
+    <PubliciseInputAssemblies Include="$(MagicalMixturePath)\The Magical Mixture Mill_Data\Managed\Assembly-CSharp.dll" />
+  </ItemGroup>
   <Target Name="Publicise" AfterTargets="BeforeBuild;Clean" Inputs="@(PubliciseInputAssemblies)" Outputs="$(SolutionDir)lib\%(PubliciseInputAssemblies.FileName)_public.dll;$(SolutionDir)lib\%(PubliciseInputAssemblies.FileName)_public.hash">
     <Publicise InputAssemblies="@(PubliciseInputAssemblies)" OutputPath="$(SolutionDir)lib/" PubliciseCompilerGenerated="true" />
   </Target>

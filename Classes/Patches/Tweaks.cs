@@ -19,14 +19,14 @@ namespace RandomThings {
         [HarmonyPatch(typeof(InventoryGrid), nameof(InventoryGrid.InitializeGridWithElements))]
         private static class InventoryGrid_InitializeGridWithElements_Patch {
             private static void Postfix(InventoryGrid __instance) {
-                if (settings.showSortButtons) {
-                    Transform inv = null;
-                    if (__instance.gameObject.name.Equals("Inventory Grid Avatar")) {
-                        inv = __instance.gameObject.transform.parent.parent;
-                    } else if (__instance.gameObject.name.Equals("Inventory Grid SmallChest Variant")) {
-                        inv = __instance.gameObject.transform.parent;
-                    }
-                    if (inv != null) {
+                Transform inv = null;
+                if (__instance.gameObject.name.Equals("Inventory Grid Avatar")) {
+                    inv = __instance.gameObject.transform.parent.parent;
+                } else if (__instance.gameObject.name.Equals("Inventory Grid SmallChest Variant")) {
+                    inv = __instance.gameObject.transform.parent;
+                }
+                if (inv != null) {
+                    if (settings.showSortButtons) {
                         var inventoryMenu = inv.Find("HeaderPlank");
                         if (inventoryMenu != null) {
                             if (inventoryMenu.Find("CustomSortButton") == null) {
@@ -43,9 +43,9 @@ namespace RandomThings {
                             }
                         }
                     }
-                }
-                if (settings.sortContainerOnOpening) {
-                    __instance.getInventory().sort(settings.sortMode);
+                    if (settings.sortContainerOnOpening) {
+                        __instance.getInventory().sort(settings.sortMode);
+                    }
                 }
             }
         }
