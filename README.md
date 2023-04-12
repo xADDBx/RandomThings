@@ -33,6 +33,9 @@
   * **Or** replace every reference to the variable in the .csproj file with the path. I don't really recommend doing that.
 * Now you should be able to build the project without problems. If you still encounter trouble please contact me on Discord or create a GitHub issue.
 
+# v0.1.5
+* Added invulnerability (In-Game Cheat).
+* Added toggle to make everything free.
 # v0.1.4
 * Fixed a bug where sort on opening Container would affect more than just inventory and chests.
 * Known issue: Button Highlighting on Hover not working

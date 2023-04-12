@@ -57,6 +57,7 @@ namespace RandomThings {
             applySaveChange();
         }
         public static void applySaveChange() {
+            SaveLoadManager.Instance.SetFieldValue("_saveGameChainFileCap", settings.saveGameChainFileCap);
         }
     }
 }

@@ -31,7 +31,7 @@ namespace RandomThings {
                                 if (child.gameObject.activeSelf) {
                                     // Only handle Player Inventory and Normal Chests
                                     if (child.name.Equals("Chest Grid Container") || child.name.Equals("Avatar Inventory")) {
-                                        using (HorizontalScope()) {
+                                        using (HorizontalScope(Width(200))) {
                                             Label(child.name.Green(), Width(200));
 
                                             InventoryGrid inv = child.GetComponentInChildren<InventoryGrid>();
@@ -44,8 +44,8 @@ namespace RandomThings {
                                                 using (VerticalScope()) {
                                                     Label("");
                                                     using (HorizontalScope()) {
-                                                        Label("Name".Cyan(), Width(200));
-                                                        Label("Amount".Cyan(), Width(50));
+                                                        Label("Name".Cyan(), Width(250));
+                                                        Label("Amount (reopen Container to see changes)".Cyan(), Width(250));
                                                         Space(-250);
                                                     }
                                                     foreach (var slot in container.GetCurrentSlots()) {
@@ -53,7 +53,8 @@ namespace RandomThings {
                                                             string name = slot.getName();
                                                             if (name != null) {
                                                                 Label(name.Cyan(), Width(200));
-                                                                Label(slot.StackSize.ToString());
+                                                                int tmp = 1;
+                                                                ValueEditor("", () => slot.StackSize, (v) => slot.StackSize = v, ref tmp, 1, slot.MaxStackSize);
                                                             } else {
                                                                 Label("Empty".Orange());
                                                             }
