@@ -37,12 +37,12 @@
 
 # v0.1.6
 * Added an option to add a more or less pretty and functional Player Map Marker.
+* Known issue: Button Highlighting on Hover not working
 # v0.1.5
 * Added invulnerability (In-Game Cheat).
 * Added toggle to make everything free.
 # v0.1.4
 * Fixed a bug where sort on opening Container would affect more than just inventory and chests.
-* Known issue: Button Highlighting on Hover not working
 # v0.1.3
 * Added different ways of sorting. The active one is chosen in the Mod Menu.
 * Added Toggles to turn on/off.
