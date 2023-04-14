@@ -1,13 +1,15 @@
 # RandomThings
 # Features
-* Add multiplier for game time (not game speed).
-* Change the amount of backup saves the game keeps (default 10, maximum 50).
-* Toggle to add custom sort buttons in inventories.
-* Toggle to automatically sort containers when the game loads.
-* Toggle to automatically sort containers when they are opened.
+* An option to add sort buttons in inventories.
+* An option to automatically sort containers when the game loads.
+* An option to automatically sort containers when they are opened.
 * Choose between 4 possible sort methods (By Name or By Total Resource Count; Ascending or Descending)
-* DisclosureToggle to view opened inventories in the mod menu.
-* DisclosureToggle to view the Game Stats (save specific and system wide)
+* An option to make everything free.
+* An option to activate invulnerability (In-Game Cheat).
+* The ability to view opened inventories in the mod menu and edit the content.
+* The ability to view the Game Stats (save specific and system wide).
+* A multiplier for game time (not game speed)
+* Change the amount of backup saves the game keeps (default 10, maximum 50)
 
 # Installation
 * Get the latest version of [Unity Mod Manager](https://www.nexusmods.com/site/mods/21) (at least 0.25.5c)
