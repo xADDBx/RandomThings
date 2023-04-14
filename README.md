@@ -1,6 +1,7 @@
 # RandomThings
 # Features
 * An option to add sort buttons in inventories.
+* An option to add a more or less pretty and functional Player Map Marker.
 * An option to automatically sort containers when the game loads.
 * An option to automatically sort containers when they are opened.
 * Choose between 4 possible sort methods (By Name or By Total Resource Count; Ascending or Descending)
