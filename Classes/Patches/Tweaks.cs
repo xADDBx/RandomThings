@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -60,9 +61,43 @@ namespace RandomThings {
             }
         }
 
-#if false
         [HarmonyPatch(typeof(UIManager), nameof(UIManager.ShowMenu), new Type[] { typeof(FullscreenUIWindowManaged.FullscreenMenuId), typeof(object) })]
-        private static class UIManager_ShowMenu_Patch {
+        public static class UIManager_ShowMenu_Patch {
+            public static void updatePosition(GameObject playerMarker) {
+                Vector3 pos = MainGameScript.Instance.PlayerAvatar.transform.localPosition;
+                Vector3 posStraight = Matrix4x4.Rotate(Quaternion.Euler(0, -45, 0)).MultiplyPoint(pos);
+                // Magic numbers found by testing
+                posStraight.x *= 2.4644f;
+                posStraight.y = posStraight.z * 2.4333f;
+                posStraight.z = 0;
+                playerMarker.transform.localPosition = posStraight + new Vector3(-149.25f, 280.5f, 0);
+                foreach (Transform child in playerMarker.transform) {
+                    child.gameObject.SetActive(true);
+                }
+            }
+            public static void createPlayerMarker() {
+                GameObject ShopPin = MainGameScript.Instance.MainCamera.transform.Find("--- REGULAR MENUS Sort Order 15/Menu - Journal/Map/LandmarkLocations/Landmark Location Shop").gameObject;
+                GameObject playerMarker = GameObject.Instantiate(ShopPin, ShopPin.transform.parent);
+                playerMarker.name = "Landmark Location Player";
+                playerMarker.transform.localScale = new Vector3(0.7f, 0.7f);
+                Main.objects.Add(playerMarker.GetHashCode(), playerMarker);
+                foreach (Transform child in playerMarker.transform) {
+                    if (child.name.Equals("ButtonText (TMP)")) {
+                        GameObject.DestroyImmediate(child.GetComponent<I2.Loc.Localize>());
+                        child.GetComponent<TMPro.TextMeshProUGUI>().text = "Player";
+                    }
+                }
+                GameObject zoomButton = MainGameScript.Instance.MainCamera.transform.Find("--- REGULAR MENUS Sort Order 15/Menu - Journal/Map/ButtonPlaqueRoundImg (TMP) Label/ButtonPlaqueRoundImg (TMP)").gameObject;
+                Button button = zoomButton.GetComponent<Button>();
+                button.onClick.RemoveAllListeners();
+                // Needs better implementation (pops in immediately instead of waiting for animation to finish)
+                button.onClick.AddListener(() => {
+                    bool turnOn = settings.showCharacterOnMap && !playerMarker.activeSelf;
+                    playerMarker.SetActive(turnOn);
+                    if (turnOn) updatePosition(playerMarker);
+                });
+                updatePosition(playerMarker);
+            }
             private static void Prefix(FullscreenUIWindowManaged.FullscreenMenuId menuId) {
                 if (menuId == FullscreenUIWindowManaged.FullscreenMenuId.Journal) {
                     if (settings.showCharacterOnMap) {
@@ -70,35 +105,17 @@ namespace RandomThings {
                         if (player != null) {
                             foreach (GameObject obj in Main.objects.Values) {
                                 if (obj.name.Equals("Landmark Location Player")) {
-                                    obj.transform.position = -obj.transform.InverseTransformPoint(player.CurrentPosition);
-                                    foreach (Transform child in obj.transform) {
-                                        child.gameObject.SetActive(true);
-                                    }
-
+                                    updatePosition(obj);
                                     return;
                                 }
                             }
-                            GameObject ShopPin = MainGameScript.Instance.MainCamera.transform.Find("--- REGULAR MENUS Sort Order 15/Menu - Journal/Map/LandmarkLocations/Landmark Location Shop").gameObject;
-                            GameObject playerMarker = GameObject.Instantiate(ShopPin, ShopPin.transform.parent);
-                            playerMarker.name = "Landmark Location Player";
-                            Main.objects.Add(playerMarker.GetHashCode(), playerMarker);
-                            //Shop -> (0, 0, 0) -> (622.75, 809.50, 0.00);
-                            //Teleport Shop -> (13.8, 0, -13.8) -> (674.20, 800.35, 0.00);
-                            //Teleport City -> (-90.42, 0.00, -179.86) -> (778.90 347.75, 0.00);
-                            //Bridge -> (-13.44, 0.00, 5.96) -> (549.10, 780.70, 0.00);
-                            foreach (Transform child in playerMarker.transform) {
-                                if (child.name.Equals("ButtonText(TMP)")) {
-                                    child.GetComponent<I2.Loc.Localize>().gameObject.SetActive(false);
-                                    child.GetComponent<TMPro.TextMeshProUGUI>().text = "Player Marker";
-                                }
-                                child.gameObject.SetActive(true);
-                            }
+                            createPlayerMarker();
                         }
                     }
                 }
             }
         }
-#endif
+
         [HarmonyPatch(typeof(PlayerPurchaseCost), nameof(PlayerPurchaseCost.TryDoPayment))]
         private static class PlayerPurchaseCost_TryDoPayment_Patch {
             private static bool Prefix() {

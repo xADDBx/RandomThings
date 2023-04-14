@@ -33,6 +33,8 @@
   * **Or** replace every reference to the variable in the .csproj file with the path. I don't really recommend doing that.
 * Now you should be able to build the project without problems. If you still encounter trouble please contact me on Discord or create a GitHub issue.
 
+# v0.1.6
+* Added an option to add a more or less pretty and functional Player Map Marker.
 # v0.1.5
 * Added invulnerability (In-Game Cheat).
 * Added toggle to make everything free.

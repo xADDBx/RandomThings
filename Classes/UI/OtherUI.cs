@@ -1,4 +1,5 @@
 ﻿using ModKit.Utility;
+using UnityEngine;
 using static ModKit.UI;
 
 namespace RandomThings {
@@ -8,20 +9,29 @@ namespace RandomThings {
         static bool showDangerous = false;
         public static void OnGUI() {
             LogSlider("Time Multiplier", ref settings.TimeMultiplier, 0.00001f, 10, 1, 5, "", AutoWidth());
+            if (Toggle("Activate Player Map Symbol", ref settings.showCharacterOnMap)) {
+                GameObject found = null;
+                foreach (var obj in Main.objects.Values) {
+                    if (obj.name.Equals("Landmark Location Player")) {
+                        found = obj;
+                    }
+                }
+                if (found != null) {
+                    found.SetActive(settings.showCharacterOnMap);
+                    if (settings.showCharacterOnMap) {
+                        Tweaks.UIManager_ShowMenu_Patch.updatePosition(found);
+                    }
+                } else {
+                    if (settings.showCharacterOnMap) {
+                        Tweaks.UIManager_ShowMenu_Patch.createPlayerMarker();
+                    }
+                }
+            }
             Toggle("Make everything free (Resources + Money)", ref settings.enableEverythingCostsNothing);
             Toggle("Make player invulnerable", ref settings.enableInvulnerability);
             if (MainGameScript.Instance.PlayerAvatar.IsInvulnerable != settings.enableInvulnerability) {
                 SettingsManager.Instance.CheatSettings.avatarInvulnerable = settings.enableInvulnerability;
             }
-#if false
-            if (Toggle("Activate Player Map Symbol", ref settings.showCharacterOnMap)) {
-                foreach (var obj in Main.objects.Values) {
-                    if (obj.name.Equals("Landmark Location Player")) {
-                        obj.SetActive(settings.showCharacterOnMap);
-                    }
-                }
-            }
-#endif
             DisclosureToggle("Show Game Stats", ref showGameStats);
             if (showGameStats) {
                 using (HorizontalScope()) {

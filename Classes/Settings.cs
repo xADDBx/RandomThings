@@ -11,9 +11,7 @@ namespace RandomThings {
         public bool showSortButtons = false;
         public bool enableInvulnerability = false;
         public bool enableEverythingCostsNothing = false;
-#if false
         public bool showCharacterOnMap = false;
-#endif
         public override void Save(UnityModManager.ModEntry modEntry) {
             Save(this, modEntry);
         }
