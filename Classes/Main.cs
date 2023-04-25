@@ -52,9 +52,11 @@ namespace RandomThings {
             TabBar(ref settings.selectedTab,
                 () => Space(25),
                 new NamedAction("Inventory", () => InventoryUI.OnGUI()),
-                new NamedAction("Other", () => OtherUI.OnGUI()),
+                new NamedAction("Other", () => OtherUI.OnGUI())
 #if DEBUG
-                new NamedAction("DataViewer", () => DataViewer.OnGUI()));
+                , new NamedAction("DataViewer", () => DataViewer.OnGUI()));
+#else
+                );
 #endif
         }
         private static void onStart() {
