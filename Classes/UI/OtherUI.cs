@@ -8,6 +8,10 @@ namespace RandomThings {
         static bool showGameStats = false;
         static bool showDangerous = false;
         public static void OnGUI() {
+#if DEBUG
+            // Opens Console; Console does nothing
+            ActionButton("Console Test", () => UIManager.Instance.ShowMenu(FullscreenUIWindowManaged.FullscreenMenuId.DevConsole));
+#endif
             LogSlider("Time Multiplier", ref settings.TimeMultiplier, 0.00001f, 10, 1, 5, "", AutoWidth());
             if (Toggle("Activate Player Map Symbol", ref settings.showCharacterOnMap)) {
                 GameObject found = null;
