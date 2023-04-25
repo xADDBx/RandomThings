@@ -20,6 +20,16 @@ namespace RandomThings {
             if (SelectionGrid(ref sortmode, new string[] { "By Name Ascending", "By Name Descending", "By Resource Count Ascending", "By Resource Count Descending" }, 2)) {
                 settings.sortMode = (Extensions.SortMode)sortmode;
             }
+            using (HorizontalScope()) {
+                Label("Changes the maximum Stack Size of Chests".Green(), Width(300));
+                ActionButton("Apply Chest Stack Size Change", () => Main.applySlotChange(Tweaks.chests, settings.maxChestStackSize), Width(250));
+                Slider(ref settings.maxChestStackSize, 50, 500, 50, "");
+            }
+            using (HorizontalScope()) {
+                Label("Changes the maximum Stack Size of Crates".Green(), Width(300));
+                ActionButton("Apply Crate Stack Size Change", () => Main.applySlotChange(Tweaks.crates, settings.maxCrateStackSize), Width(250));
+                Slider(ref settings.maxCrateStackSize, 50, 500, 50, "");
+            }
             DisclosureToggle("Show Open Inventories", ref showInventories);
             if (showInventories) {
                 using (HorizontalScope()) {

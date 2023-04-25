@@ -35,6 +35,7 @@ namespace RandomThings {
             foreach (var k in objects.Keys) {
                 objects[k].SafeDestroy();
             }
+            DataViewer.ResetTree();
             HarmonyInstance.UnpatchAll(modEntry.Info.Id);
             return true;
         }
@@ -51,13 +52,25 @@ namespace RandomThings {
             TabBar(ref settings.selectedTab,
                 () => Space(25),
                 new NamedAction("Inventory", () => InventoryUI.OnGUI()),
-                new NamedAction("Other", () => OtherUI.OnGUI()));
+                new NamedAction("Other", () => OtherUI.OnGUI()),
+#if DEBUG
+                new NamedAction("DataViewer", () => DataViewer.OnGUI()));
+#endif
         }
         private static void onStart() {
             applySaveChange();
         }
         public static void applySaveChange() {
             SaveLoadManager.Instance.SetFieldValue("_saveGameChainFileCap", settings.saveGameChainFileCap);
+        }
+
+        public static void applySlotChange(HashSet<SolidResourceHolder> inventories, int newStackCap) {
+            foreach (var inv in inventories) {
+                inv.MaxStackSize = newStackCap;
+                foreach (var slot in inv.GetCurrentSlots()) {
+                    slot.MaxStackSize = newStackCap;
+                }
+            }
         }
     }
 }

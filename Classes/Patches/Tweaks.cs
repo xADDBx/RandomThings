@@ -1,21 +1,23 @@
 ﻿using HarmonyLib;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace RandomThings {
     public static class Tweaks {
         public static Settings settings => Main.settings;
+        public static HashSet<SolidResourceHolder> chests = new();
+        public static HashSet<SolidResourceHolder> crates = new();
 
         [HarmonyPatch(typeof(MasterTimer), nameof(MasterTimer.Update))]
         private static class MasterTimer_Update_Patch {
             private static void Prefix(MasterTimer __instance) {
-                if (!__instance.IsFastForwardingTowardsTarget && settings.TimeMultiplier != 1f) {
+                if (!__instance.IsFastForwardingTowardsTarget && (settings.TimeMultiplier != 1f || __instance.TimeMultiplier != 1f)) {
                     __instance.TimeMultiplier = settings.TimeMultiplier;
                 }
             }
         }
-
 
         [HarmonyPatch(typeof(InventoryGrid), nameof(InventoryGrid.InitializeGridWithElements))]
         private static class InventoryGrid_InitializeGridWithElements_Patch {
@@ -111,6 +113,23 @@ namespace RandomThings {
                             }
                             createPlayerMarker();
                         }
+                    }
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(SolidResourceHolder), nameof(SolidResourceHolder.Awake))]
+        private static class SolidResourceHolder_Awake_Patch {
+            private static void Prefix(SolidResourceHolder __instance) {
+                if (__instance.gameObject.name.Equals("Chest(Clone)")) {
+                    chests.Add(__instance);
+                    if (settings.maxChestStackSize > 50) {
+                        __instance.MaxStackSize = settings.maxChestStackSize;
+                    }
+                } else if (__instance.gameObject.name.Equals("Crate(Clone)")) {
+                    crates.Add(__instance);
+                    if (settings.maxCrateStackSize > 50) {
+                        __instance.MaxStackSize = settings.maxCrateStackSize;
                     }
                 }
             }
