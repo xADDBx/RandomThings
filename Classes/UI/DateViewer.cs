@@ -30,10 +30,12 @@ namespace RandomThings {
             { "DialogueManager", () => DialogueManager.Instance },
             { "MasterTimer", () => MasterTimer.Instance },
             { "UI Manager", () => UIManager.Instance },
+            { "Potion Prices", () => PotionPricing.Instance },
             { "DBCustomerDatabase", () => typeof(DBCustomerDatabase) },
             { "QuestLog", () => typeof(QuestLog) },
             { "DialogueLua", () => typeof(DialogueLua) },
             { "DialogueDatabase", () => typeof(DialogueDatabase) },
+            { "ResourceFactory", () => ResourceNodeManager.Instance },
             { "QuestManager", () => QuestManager.Instance },
             { "QuestStateManager", () => QuestStateManager.Instance },
             { "Root Game Objects", () => DataViewer.GetAllScenes().SelectMany(s => s.GetRootGameObjects()) },
@@ -75,7 +77,7 @@ namespace RandomThings {
             } catch (Exception e) {
                 Main.settings.selectedRawDataType = 0;
                 _treeView.Clear();
-                Main.Mod.Error(e.StackTrace);
+                Mod.Error(e.StackTrace);
                 throw e;
             }
         }
