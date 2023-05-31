@@ -37,6 +37,8 @@
   * **Or** replace every reference to the variable in the .csproj file with the path. I don't really recommend doing that.
 * Now you should be able to build the project without problems. If you still encounter trouble please contact me on Discord or create a GitHub issue.
 
+# v0.2.0
+* Added Slider to multiply loot.
 # v0.1.7
 * Added Sliders to change the maximum Stack Size for Crates and Chests. Change the size using the slider and then press the apply button to apply the changes. Uninstalling the mod causes the stack size to return to normal.
 # v0.1.6
