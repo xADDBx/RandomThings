@@ -1,12 +1,15 @@
 ﻿using ModKit.Utility;
+using System;
 using UnityEngine;
 using static ModKit.UI;
+using static ResourceSource_Base;
 
 namespace RandomThings {
     public static class OtherUI {
         public static Settings settings => Main.settings;
         static bool showGameStats = false;
         static bool showDangerous = false;
+        static bool showMultiplier = false;
         public static void OnGUI() {
 #if DEBUG
             // Opens Console; Console does nothing
@@ -14,21 +17,18 @@ namespace RandomThings {
 #endif
             LogSlider("Time Multiplier", ref settings.TimeMultiplier, 0.00001f, 10, 1, 5, "", AutoWidth());
             LogSlider("Loot Multiplier", ref settings.LootMultiplier, 0.00001f, 100, 1, 5, "", AutoWidth());
-            if (Toggle("Activate Player Map Symbol", ref settings.showCharacterOnMap)) {
-                GameObject found = null;
-                foreach (var obj in Main.objects.Values) {
-                    if (obj.name.Equals("Landmark Location Player")) {
-                        found = obj;
-                    }
-                }
-                if (found != null) {
-                    found.SetActive(settings.showCharacterOnMap);
-                    if (settings.showCharacterOnMap) {
-                        Tweaks.UIManager_ShowMenu_Patch.updatePosition(found);
-                    }
-                } else {
-                    if (settings.showCharacterOnMap) {
-                        Tweaks.UIManager_ShowMenu_Patch.createPlayerMarker();
+            Toggle("Use Item Specific Use Multipliers", ref settings.useFineLootMultiplier);
+            DisclosureToggle("Item Loot Multiplier", ref showMultiplier);
+            if (showMultiplier) {
+                using (HorizontalScope()) {
+                    Space(10);
+                    using (VerticalScope()) {
+                        foreach (ResourceSourceVariants res in Enum.GetValues(typeof(ResourceSourceVariants))) {
+                            float tmp = settings.fineLootMultipliers[res];
+                            if (LogSlider($"{res} Loot Multiplier", ref tmp, 0.00001f, 100, 1, 5, "", AutoWidth())) {
+                                settings.fineLootMultipliers[res] = tmp;
+                            }
+                        }
                     }
                 }
             }
@@ -43,6 +43,27 @@ namespace RandomThings {
                     Space(20);
                     Label(GameStatsManager.Instance.GetStatsInAString(), AutoWidth());
                 }
+            }
+            using (HorizontalScope()) {
+                if (Toggle("Activate Player Map Symbol", ref settings.showCharacterOnMap, Width(300))) {
+                    GameObject found = null;
+                    foreach (var obj in Main.objects.Values) {
+                        if (obj.name.Equals("Landmark Location Player")) {
+                            found = obj;
+                        }
+                    }
+                    if (found != null) {
+                        found.SetActive(settings.showCharacterOnMap);
+                        if (settings.showCharacterOnMap) {
+                            Tweaks.UIManager_ShowMenu_Patch.updatePosition(found);
+                        }
+                    } else {
+                        if (settings.showCharacterOnMap) {
+                            Tweaks.UIManager_ShowMenu_Patch.createPlayerMarker();
+                        }
+                    }
+                }
+                Label("This only works for Outskirts".Green());
             }
             DisclosureToggle("Dangerous", ref showDangerous);
             if (showDangerous) {

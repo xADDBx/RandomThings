@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -121,12 +122,12 @@ namespace RandomThings {
         [HarmonyPatch(typeof(SolidResourceHolder), nameof(SolidResourceHolder.Awake))]
         private static class SolidResourceHolder_Awake_Patch {
             private static void Prefix(SolidResourceHolder __instance) {
-                if (__instance.gameObject.name.Equals("Chest(Clone)")) {
+                if (__instance.gameObject.name.StartsWith("Chest")) {
                     chests.Add(__instance);
                     if (settings.maxChestStackSize > 50) {
                         __instance.MaxStackSize = settings.maxChestStackSize;
                     }
-                } else if (__instance.gameObject.name.Equals("Crate(Clone)")) {
+                } else if (__instance.gameObject.name.StartsWith("Crate")) {
                     crates.Add(__instance);
                     if (settings.maxCrateStackSize > 50) {
                         __instance.MaxStackSize = settings.maxCrateStackSize;
@@ -156,7 +157,7 @@ namespace RandomThings {
         [HarmonyPatch(typeof(ResourceLootSpawner), nameof(ResourceLootSpawner.SpawnLootFromSpawnPoint))]
         private static class ResourceLootSpawner_SpawnLootFromSpawnPoint_Patch {
             private static bool Prefix(ResourceLootSpawner __instance, ResourceSpawnPoint point, LootSpawnSettings lootSpawnSettings) {
-                if (settings.LootMultiplier != 1.0f) {
+                if (__instance.AreaObject.ToString().ToLower().Contains("resourcesource") && (settings.LootMultiplier != 1.0f || (settings.useFineLootMultiplier && settings.fineLootMultipliers.Any(kv => kv.Value != 1.0f)))) {
                     if (point.HasSpawned) {
                         return false;
                     }
@@ -167,7 +168,11 @@ namespace RandomThings {
                     __instance.circularMultiplier = UnityEngine.Random.Range(__instance.LootCircularSliceMultiplier.x, __instance.LootCircularSliceMultiplier.y);
                     Vector3 position = point.transform.position;
                     foreach (KeyValuePair<string, LootEntry> keyValuePair in point.Entries) {
-                        ResourceLootSpawner._spawnLootFromSpawnPoint = (int)(settings.LootMultiplier * keyValuePair.Value.SpawnCount);
+                        if (!settings.useFineLootMultiplier) {
+                            ResourceLootSpawner._spawnLootFromSpawnPoint = (int)(settings.LootMultiplier * keyValuePair.Value.SpawnCount);
+                        } else {
+                            ResourceLootSpawner._spawnLootFromSpawnPoint = (int)(settings.fineLootMultipliers[__instance.RSBase.ResourceSourceVariant] * keyValuePair.Value.SpawnCount);
+                        }
                         while (ResourceLootSpawner._spawnLootFromSpawnPoint > 0) {
                             __instance.GenerateLootAtPoint(keyValuePair.Key, keyValuePair.Value, position, lootSpawnSettings);
                             ResourceLootSpawner._spawnLootFromSpawnPoint--;
