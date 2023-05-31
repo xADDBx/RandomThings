@@ -1,8 +1,8 @@
 ﻿// Copyright < 2021 > Narria (github user Cabarius) - License: MIT
+using UnityEngine;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 using GL = UnityEngine.GUILayout;
 
 namespace ModKit {
@@ -93,7 +93,7 @@ namespace ModKit {
 
         public static void EnumGrid<TEnum>(Func<TEnum> get, Action<TEnum> set, int xCols, params GUILayoutOption[] options) where TEnum : struct {
             var value = get();
-            var names = Enum.GetNames(typeof(TEnum)).Select(name => name.localize()).ToArray();
+            var names = Enum.GetNames(typeof(TEnum));
             var index = Array.IndexOf(names, value.ToString());
             if (SelectionGrid(ref index, names, xCols, options)) {
                 if (Enum.TryParse(names[index], out TEnum newValue)) {
@@ -109,7 +109,6 @@ namespace ModKit {
             var nameToEnum = value.NameToValueDictionary();
             if (titleFormater != null)
                 formatedNames = names.Select((n) => titleFormater(n, nameToEnum[n])).ToArray();
-            formatedNames = formatedNames.Select(n => n.localize()).ToArray();
             var index = Array.IndexOf(names, value.ToString());
             var oldIndex = index;
             if (style == null ? SelectionGrid(ref index, formatedNames, xCols, options) : SelectionGrid(ref index, formatedNames, xCols, style, options)) {
@@ -122,7 +121,7 @@ namespace ModKit {
         }
         public static bool EnumGrid<TEnum>(ref TEnum value, int xCols, Func<string, TEnum, string> titleFormater = null, params GUILayoutOption[] options) where TEnum : struct => EnumGrid(ref value, xCols, titleFormater, null, options);
         public static bool EnumGrid<TEnum>(ref TEnum value, int xCols, params GUILayoutOption[] options) where TEnum : struct => EnumGrid(ref value, xCols, null, options);
-        public static bool EnumGrid<TEnum>(ref TEnum value, params GUILayoutOption[] options) where TEnum : struct => EnumGrid(ref value, 0, null, options);
+        public static bool EnumGrid<TEnum>(ref TEnum value, params GUILayoutOption[] options) where TEnum : struct => EnumGrid(ref value,0, null, options);
         public static bool EnumGrid<TEnum>(string title, ref TEnum value, int xCols, params GUILayoutOption[] options) where TEnum : struct {
             var changed = false;
             using (HorizontalScope()) {
@@ -169,7 +168,7 @@ namespace ModKit {
                 changed = EnumGrid(ref value, xCols, titleFormater, style, options);
             }
             return changed;
-        }
+         }
         public static bool EnumGrid<TEnum>(string title, Func<TEnum> get, Action<TEnum> set, params GUILayoutOption[] options) where TEnum : struct {
             var changed = false;
             using (HorizontalScope()) {
@@ -207,15 +206,9 @@ namespace ModKit {
             Space(25);
             selected = GL.SelectionGrid(selected, titles.ToArray(), xCols, options);
         }
-        public static NamedFunc<T> TypePicker<T>(string title, ref int selectedIndex, NamedFunc<T>[] items, bool shouldLocalize = false) where T : class {
+        public static NamedFunc<T> TypePicker<T>(string title, ref int selectedIndex, NamedFunc<T>[] items) where T : class {
             var sel = selectedIndex;
-            string[] titles;
-            if (shouldLocalize) {
-                titles = items.Select((item, i) => i == sel ? item.name.localize().orange().bold() : item.name.localize()).ToArray();
-            }
-            else {
-                titles = items.Select((item, i) => i == sel ? item.name.orange().bold() : item.name).ToArray();
-            }
+            var titles = items.Select((item, i) => i == sel ? item.name.orange().bold() : item.name).ToArray();
             if (title?.Length > 0) { Label(title); }
             selectedIndex = GL.SelectionGrid(selectedIndex, titles, 6);
             return items[selectedIndex];
@@ -225,7 +218,7 @@ namespace ModKit {
 
         public static bool GridPicker<T>(
                 string title,
-                ref T selected,
+                ref T selected, 
                 List<T> items,
                 string unselectedTitle,
                 Func<T, string> titler,
@@ -289,7 +282,7 @@ namespace ModKit {
                 ref string searchText,
                 int xCols,
                 params GUILayoutOption[] options
-                ) where T : class
+                ) where T : class 
             => GridPicker(title, ref selected, items, unselectedTitle, titler, ref searchText, xCols, buttonStyle, options);
         public static bool GridPicker<T>(
                 string title,
@@ -298,7 +291,7 @@ namespace ModKit {
                 Func<T, string> titler,
                 ref string searchText,
                 params GUILayoutOption[] options
-                ) where T : class
+                ) where T : class 
             => GridPicker(title, ref selected, items, unselectedTitle, titler, ref searchText, 6, buttonStyle, options);
 
         // VPicker
@@ -330,7 +323,7 @@ namespace ModKit {
                 ref string searchText,
                 Action extras,
                 params GUILayoutOption[] options
-                ) where T : class
+                ) where T : class 
             => VPicker(title, ref selected, items, unselectedTitle, titler, ref searchText, extras, buttonStyle, options);
         public static bool VPicker<T>(
                 string title,

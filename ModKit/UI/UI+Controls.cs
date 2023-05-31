@@ -1,9 +1,10 @@
 ﻿// Copyright < 2021 > Narria (github user Cabarius) - License: MIT
+using UnityEngine;
 using System;
+using GL = UnityEngine.GUILayout;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
-using GL = UnityEngine.GUILayout;
+using JetBrains.Annotations;
 
 namespace ModKit {
     public static partial class UI {
@@ -38,19 +39,6 @@ namespace ModKit {
             // var content = tooltip == null ? new GUIContent(title) : new GUIContent(title, tooltip);
             //  if (options.Length == 0) { options = new GUILayoutOption[] { GL.Width(150f) }; }
             GL.Label(content, options);
-        public static void TitleLabel(string title, params GUILayoutOption[] options) {
-            using (VerticalScope(options.AddDefaults())) {
-                Rect lastRect;
-                using (HorizontalScope(options.AddDefaults())) {
-                    GL.Label(title, AutoWidth());
-                    lastRect = GUILayoutUtility.GetLastRect();
-                }
-                DivLast(lastRect);
-            }
-        }
-        public static void ClipboardLabel(string title, params GUILayoutOption[] options) => GUILayout.TextArea(title, options);
-        public static void HelpLabel(string title, params GUILayoutOption[] options) => Label(title.green(), options);
-        public static void HelpLabel(string title, GUIStyle style, params GUILayoutOption[] options) => Label(title.green(), style, options);
         public static void DescriptiveLabel(string title, string description, params GUILayoutOption[] options) {
             options = options.AddDefaults(Width(300));
             using (HorizontalScope()) {
@@ -63,16 +51,13 @@ namespace ModKit {
             var changed = false;
             if (editState.Item1 != label) {
                 using (HorizontalScope(options.AddDefaults())) {
-                    var formattedLabel = formatter != null ? formatter(label) : label;
-                    Label(formattedLabel, style, AutoWidth());
+                    Label(formatter(label), style, AutoWidth());
                     Space(5);
                     if (GL.Button(Glyphs.Edit, GUI.skin.box, AutoWidth())) {
                         editState = (label, label);
-                        Mod.Log($"Edit: {editState}");
                     }
                 }
-            }
-            else {
+            } else {
                 GUI.SetNextControlName(label);
                 using (HorizontalScope(options)) {
                     TextField(ref editState.Item2, null, MinWidth(minWidth), AutoWidth());
@@ -80,7 +65,6 @@ namespace ModKit {
                     if (GL.Button(Glyphs.CheckOff.red(), GUI.skin.box, AutoWidth())) {
                         editState = (null, null);
                     }
-                    // ReSharper disable once InvertIf
                     if (GL.Button(Glyphs.CheckOn.green(), GUI.skin.box, AutoWidth())
                         || userHasHitReturn && focusedControlName == label) {
                         label = editState.Item2;
@@ -105,8 +89,7 @@ namespace ModKit {
             TextField(ref text, name, options);
             if (int.TryParse(text, out var val)) {
                 value = val;
-            }
-            else if (text == "") {
+            } else if (text == "") {
                 value = 0;
             }
             return value;
@@ -116,8 +99,7 @@ namespace ModKit {
             TextField(ref text, name, options);
             if (float.TryParse(text, out var val)) {
                 value = val;
-            }
-            else if (text == "") {
+            } else if (text == "") {
                 value = 0;
             }
             return value;
@@ -217,11 +199,11 @@ namespace ModKit {
                 ActionButton(title, () => { areYouSure = !areYouSure; });
                 if (areYouSureState) {
                     Space(25);
-                    Label("Are you sure?".localize().yellow());
+                    Label("Are you sure?".yellow());
                     Space(25);
-                    ActionButton("YES".localize().yellow().bold(), action);
+                    ActionButton("YES".yellow().bold(), action);
                     Space(10);
-                    ActionButton("NO".localize().green(), () => areYouSure = false);
+                    ActionButton("NO".green(), () => areYouSure = false);
                     Space(25);
                     Label(warning.orange());
                 }
@@ -231,36 +213,31 @@ namespace ModKit {
 
         // Value Adjusters
 
-        public static bool ValueAdjuster(ref int value, int increment = 1, int min = 0, int max = int.MaxValue, bool showMinMax = true) {
+        public static bool ValueAdjuster(ref int value, int increment = 1, int min = 0, int max = int.MaxValue) {
             var v = value;
             if (v > min)
                 ActionButton(" < ", () => { v = Math.Max(v - increment, min); }, textBoxStyle, AutoWidth());
-            else if (showMinMax) {
+            else {
                 Space(-21);
                 ActionButton("min ".cyan(), () => { }, textBoxStyle, AutoWidth());
-            }
-            else {
-                34.space();
             }
             var temp = false;
             Button($"{v}".orange().bold(), ref temp, textBoxStyle, AutoWidth());
             if (v < max)
                 ActionButton(" > ", () => { v = Math.Min(v + increment, max); }, textBoxStyle, AutoWidth());
-            else if (showMinMax) {
+            else {
                 ActionButton(" max".cyan(), () => { }, textBoxStyle, AutoWidth());
                 Space(-27);
             }
-            else
-                34.space();
             if (v != value) {
                 value = v;
                 return true;
             }
             return false;
         }
-        public static bool ValueAdjuster(Func<int> get, Action<int> set, int increment = 1, int min = 0, int max = int.MaxValue, bool showMinMax = true) {
+        public static bool ValueAdjuster(Func<int> get, Action<int> set, int increment = 1, int min = 0, int max = int.MaxValue) {
             var value = get();
-            var changed = ValueAdjuster(ref value, increment, min, max, showMinMax);
+            var changed = ValueAdjuster(ref value, increment, min, max);
             if (changed)
                 set(value);
             return changed;
@@ -274,13 +251,13 @@ namespace ModKit {
             }
             return changed;
         }
-        public static bool ValueAdjuster(string title, Func<int> get, Action<int> set, int increment = 1, int min = 0, int max = int.MaxValue, bool showMinMax = true) {
+        public static bool ValueAdjuster(string title, Func<int> get, Action<int> set, int increment = 1, int min = 0, int max = int.MaxValue) {
             var changed = false;
             using (HorizontalScope(Width(400))) {
                 Label(title.cyan(), Width(300));
                 Space(15);
                 var value = get();
-                changed = ValueAdjuster(ref value, increment, min, max, showMinMax);
+                changed = ValueAdjuster(ref value, increment, min, max);
                 if (changed)
                     set(value);
             }
@@ -350,44 +327,43 @@ namespace ModKit {
                 if (units.Length > 0)
                     Label($"{units}".orange().bold(), Width(25 + GUI.skin.label.CalcSize(new GUIContent(units)).x));
                 Space(25);
-                ActionButton("Reset".localize(), () => { newValue = defaultValue; }, AutoWidth());
+                ActionButton("Reset", () => { newValue = defaultValue; }, AutoWidth());
             }
-            var changed = Math.Abs(value - newValue) > float.Epsilon;
+            var changed = value != newValue;
             value = newValue;
             return changed;
         }
 
-        private const int SliderTop = 3;
-        private const int SliderBottom = -7;
-
+        private const int sliderTop = 3;
+        private const int sliderBottom = -7;
         public static bool Slider(string title, ref float value, float min, float max, float defaultValue = 1.0f, int decimals = 0, string units = "", params GUILayoutOption[] options) {
             value = Math.Max(min, Math.Min(max, value));    // clamp it
             var newValue = value;
             using (HorizontalScope(options)) {
                 using (VerticalScope(Width(300))) {
-                    Space((SliderTop - 1).point());
+                    Space((sliderTop - 1).point());
                     Label(title.cyan(), Width(300));
-                    Space(SliderBottom.point());
+                    Space(sliderBottom.point());
                 }
                 Space(25);
                 using (VerticalScope(Width(200))) {
-                    Space((SliderTop + 4).point());
+                    Space((sliderTop + 4).point());
                     newValue = (float)Math.Round(GL.HorizontalSlider(value, min, max, Width(200)), decimals);
-                    Space(SliderBottom.point());
+                    Space(sliderBottom.point());
                 }
                 Space(25);
                 using (VerticalScope(Width(75))) {
-                    Space((SliderTop + 2).point());
+                    Space((sliderTop + 2).point());
                     FloatTextField(ref newValue, null, Width(75));
-                    Space(SliderBottom.point());
+                    Space(sliderBottom.point());
                 }
                 if (units.Length > 0)
                     Label($"{units}".orange().bold(), Width(25 + GUI.skin.label.CalcSize(new GUIContent(units)).x));
                 Space(25);
                 using (VerticalScope(AutoWidth())) {
-                    Space((SliderTop - 0).point());
-                    ActionButton("Reset".localize(), () => { newValue = defaultValue; }, AutoWidth());
-                    Space(SliderBottom.point());
+                    Space((sliderTop - 0).point());
+                    ActionButton("Reset", () => { newValue = defaultValue; }, AutoWidth());
+                    Space(sliderBottom.point());
                 }
             }
             var changed = value != newValue;
@@ -403,22 +379,23 @@ namespace ModKit {
             return changed;
         }
         public static bool Slider(string title, ref int value, int min, int max, int defaultValue = 1, string units = "", params GUILayoutOption[] options) {
-            float floatValue = value;
-            var changed = Slider(title, ref floatValue, min, max, (float)defaultValue, 0, units, options);
-            value = (int)floatValue;
+            float fvalue = value;
+            var changed = Slider(title, ref fvalue, min, max, (float)defaultValue, 0, units, options);
+            value = (int)fvalue;
             return changed;
         }
         public static bool Slider(string title, Func<int> get, Action<int> set, int min, int max, int defaultValue = 1, string units = "", params GUILayoutOption[] options) {
-            float floatValue = get();
-            var changed = Slider(title, ref floatValue, min, max, (float)defaultValue, 0, units, options);
+            float fvalue = get();
+            var changed = Slider(title, ref fvalue, min, max, (float)defaultValue, 0, units, options);
             if (changed)
-                set((int)floatValue);
+                set((int)fvalue);
             return changed;
         }
+
         public static bool Slider(ref int value, int min, int max, int defaultValue = 1, string units = "", params GUILayoutOption[] options) {
-            float floatValue = value;
-            var changed = Slider(ref floatValue, min, max, (float)defaultValue, 0, units, options);
-            value = (int)floatValue;
+            float fvalue = value;
+            var changed = Slider(ref fvalue, min, max, (float)defaultValue, 0, units, options);
+            value = (int)fvalue;
             return changed;
         }
         public static bool LogSlider(string title, ref float value, float min, float max, float defaultValue = 1.0f, int decimals = 0, string units = "", params GUILayoutOption[] options) {
@@ -426,44 +403,43 @@ namespace ModKit {
                 throw new Exception("LogSlider - min value: {min} must be >= 0");
             BeginHorizontal(options);
             using (VerticalScope(Width(300))) {
-                Space((SliderTop - 1).point());
+                Space((sliderTop - 1).point());
                 Label(title.cyan(), Width(300));
-                Space(SliderBottom.point());
+                Space(sliderBottom.point());
             }
             Space(25);
             value = Math.Max(min, Math.Min(max, value));    // clamp it
-            const int offset = 1;
+            var offset = 1;
             var places = (int)Math.Max(0, Math.Min(15, decimals + 1.01 - Math.Log10(value + offset)));
             var logMin = 100f * (float)Math.Log10(min + offset);
             var logMax = 100f * (float)Math.Log10(max + offset);
             var logValue = 100f * (float)Math.Log10(value + offset);
-            float logNewValue;
+            var logNewValue = logValue;
             using (VerticalScope(Width(200))) {
-                Space((SliderTop + 4).point());
+                Space((sliderTop + 4).point());
                 logNewValue = (float)(GL.HorizontalSlider(logValue, logMin, logMax, Width(200)));
-                Space(SliderBottom.point());
+                Space(sliderBottom.point());
             }
             var newValue = (float)Math.Round(Math.Pow(10, logNewValue / 100f) - offset, places);
             Space(25);
             using (VerticalScope(Width(75))) {
-                Space((SliderTop + 2).point());
+                Space((sliderTop + 2).point());
                 FloatTextField(ref newValue, null, Width(75));
-                Space(SliderBottom.point());
+                Space(sliderBottom.point());
             }
             if (units.Length > 0)
                 Label($"{units}".orange().bold(), Width(25 + GUI.skin.label.CalcSize(new GUIContent(units)).x));
             Space(25);
             using (VerticalScope(AutoWidth())) {
-                Space((SliderTop + 0).point());
-                ActionButton("Reset".localize(), () => { newValue = defaultValue; }, AutoWidth());
-                Space(SliderBottom.point());
+                Space((sliderTop + 0).point());
+                ActionButton("Reset", () => { newValue = defaultValue; }, AutoWidth());
+                Space(sliderBottom.point());
             }
             EndHorizontal();
-            var changed = Math.Abs(value - newValue) > float.Epsilon;
+            var changed = value != newValue;
             value = Math.Min(max, Math.Max(min, newValue));
             return changed;
         }
-
         public static bool LogSlider(string title, Func<float> get, Action<float> set, float min, float max, float defaultValue = 1.0f, int decimals = 0, string units = "", params GUILayoutOption[] options) {
             var value = get();
             var changed = LogSlider(title, ref value, min, max, defaultValue, decimals, units, options);
@@ -477,9 +453,9 @@ namespace ModKit {
                 throw new Exception("LogSlider - min value: {min} must be >= 0");
             BeginHorizontal(options);
             using (VerticalScope(Width(labelWidth))) {
-                Space((SliderTop - 1).point());
+                Space((sliderTop - 1).point());
                 Label(title.cyan(), Width(labelWidth));
-                Space(SliderBottom.point());
+                Space(sliderBottom.point());
             }
             Space(25);
             value = Math.Max(min, Math.Min(max, value));    // clamp it
@@ -488,29 +464,29 @@ namespace ModKit {
             var logMin = 100f * (float)Math.Log10(min + offset);
             var logMax = 100f * (float)Math.Log10(max + offset);
             var logValue = 100f * (float)Math.Log10(value + offset);
-            float logNewValue;
+            var logNewValue = logValue;
             using (VerticalScope(Width(200))) {
-                Space((SliderTop + 4).point());
+                Space((sliderTop + 4).point());
                 logNewValue = (float)(GL.HorizontalSlider(logValue, logMin, logMax, Width(200)));
-                Space(SliderBottom.point());
+                Space(sliderBottom.point());
             }
             var newValue = (float)Math.Round(Math.Pow(10, logNewValue / 100f) - offset, places);
             Space(25);
             using (VerticalScope(Width(75))) {
-                Space((SliderTop + 2).point());
+                Space((sliderTop + 2).point());
                 FloatTextField(ref newValue, null, Width(75));
-                Space(SliderBottom.point());
+                Space(sliderBottom.point());
             }
             if (units.Length > 0)
                 Label($"{units}".orange().bold(), Width(25 + GUI.skin.label.CalcSize(new GUIContent(units)).x));
             Space(25);
             using (VerticalScope(AutoWidth())) {
-                Space((SliderTop + 0).point());
-                ActionButton("Reset".localize(), () => { newValue = defaultValue; }, AutoWidth());
-                Space(SliderBottom.point());
+                Space((sliderTop + 0).point());
+                ActionButton("Reset", () => { newValue = defaultValue; }, AutoWidth());
+                Space(sliderBottom.point());
             }
             EndHorizontal();
-            var changed = Math.Abs(value - newValue) > float.Epsilon;
+            var changed = value != newValue;
             value = Math.Min(max, Math.Max(min, newValue));
             return changed;
         }

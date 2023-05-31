@@ -15,17 +15,6 @@ namespace ModKit {
         void HandleModDisable();
     }
 
-    public partial class Mod {
-        public delegate void ShowGUINotifierMethod();
-        public static ShowGUINotifierMethod NotifyOnShowGUI;
-
-        public static void OnShowGUI() {
-            if (NotifyOnShowGUI != null) {
-                NotifyOnShowGUI();
-            }
-        }
-    }
-
     public class ModManager<TCore, TSettings>
         where TCore : class, new()
         where TSettings : UnityModManager.ModSettings, new() {
@@ -58,7 +47,6 @@ namespace ModKit {
 
             using ProcessLogger process = new(_logger);
             try {
-                Mod.modEntry = modEntry;
                 process.Log("Enabling.");
                 var dict = Harmony.VersionInfo(out var myVersion);
                 process.Log($"Harmony version: {myVersion}");
@@ -70,7 +58,6 @@ namespace ModKit {
                 modEntry.OnSaveGUI += HandleSaveGUI;
                 Version = modEntry.Version;
                 Settings = UnityModManager.ModSettings.Load<TSettings>(modEntry);
-                ModKitSettings.Load();
                 Core = new TCore();
 
                 var types = assembly.GetTypes();
@@ -170,14 +157,10 @@ namespace ModKit {
         public void ResetSettings() {
             if (Enabled) {
                 Settings = new TSettings();
-                Mod.ModKitSettings = new ModKitSettings();
             }
         }
 
-        private void HandleSaveGUI(UnityModManager.ModEntry modEntry) {
-            UnityModManager.ModSettings.Save(Settings, modEntry);
-            ModKitSettings.Save();
-        }
+        private void HandleSaveGUI(UnityModManager.ModEntry modEntry) => UnityModManager.ModSettings.Save(Settings, modEntry);
 
         #endregion
 

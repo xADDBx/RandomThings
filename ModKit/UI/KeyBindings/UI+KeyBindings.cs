@@ -1,11 +1,10 @@
-﻿using System;
-using System.Linq;
-using UnityEngine;
+﻿using UnityEngine;
+using System;
 using GL = UnityEngine.GUILayout;
+using System.Linq;
 
 namespace ModKit {
     public static partial class UI {
-        // Here we provide UI elements for managing KeyBinds.  We provide a low level UI to set the keys for a key binding as well as some built in controls. 
         private static string selectedIdentifier = null;
         private static KeyBind oldValue = null;
         public static KeyBind EditKeyBind(string identifier, bool showHint = true, bool allowModifierOnly = false, params GUILayoutOption[] options) {
@@ -33,10 +32,7 @@ namespace ModKit {
                     keyBind = new KeyBind(identifier);
                     KeyBindings.SetBinding(identifier, keyBind);
                 }
-                var bind = keyBind;
                 if (conflicts.Count() > 0) {
-                    ActionButton("Replace", () => { bind.RemoveConflicts(); });
-                    ActionButton("Clear", () => { KeyBindings.ClearBinding(bind.ID); });
                     Label("conflicts".orange().bold() + "\n" + string.Join("\n", conflicts));
                 }
                 if (showHint) {
@@ -44,12 +40,6 @@ namespace ModKit {
                     if (keyBind.IsEmpty)
                         hint = oldValue == null ? "set key binding".green() : "press key".green();
                     Label(hint);
-                    if (oldValue != null)
-                        ActionButton("Clear",
-                                     () => {
-                                         KeyBindings.ClearBinding(oldValue.ID);
-                                         selectedIdentifier = null;
-                                     });
                 }
             }
             if (isEditing && keyBind.IsEmpty && Event.current != null) {
@@ -77,8 +67,8 @@ namespace ModKit {
 
                 // Allow raw modifier keys as keybinds
                 if (Event.current.isKey && keyCode.IsModifier() && allowModifierOnly) {
-                    keyBind = new KeyBind(identifier, keyCode, false, false, false, false, true);
-                    Mod.Trace($"    currentEvent isKey - bind: {keyBind} isModifierOnly:{keyBind.IsModifierOnly}");
+                    keyBind = new KeyBind(identifier, keyCode, false, false, false, false);
+                    Mod.Trace($"    currentEvent isKey - bind: {keyBind}");
                     KeyBindings.SetBinding(identifier, keyBind);
                     selectedIdentifier = null;
                     oldValue = null;
@@ -99,7 +89,6 @@ namespace ModKit {
             }
             return keyBind;
         }
-        // Standalone control that lets the user set and edit a KeyBind associated with an identifier. Note you must call KeyBindings.RegisterAction to have this keybind fire an action. You also need to call KeyBindings.OnUpdate from your mod's OnUpdate delegate in order for ModKit to detect the keys and fire the action
         public static void KeyBindPicker(string identifier, string title, float indent = 0, float titleWidth = 0) {
             using (HorizontalScope()) {
                 Space(indent);
@@ -108,8 +97,7 @@ namespace ModKit {
                 EditKeyBind(identifier, true);
             }
         }
-        // This is a special helper that lets you choose only modifiers like ctrl, shift, alt, etc.  This is useful for checking for modifiers on a mouse click. To check for the presence of a registered set of modifiers do this 
-        // UI.KeyBindings.GetBinding(<identifier>).IsModifierActive
+
         public static void ModifierPicker(string identifier, string title, float indent = 0, float titleWidth = 0) {
             using (HorizontalScope()) {
                 Label(title.bold(), titleWidth == 0 ? ExpandWidth(false) : Width(titleWidth));
@@ -118,27 +106,18 @@ namespace ModKit {
             }
         }
 
-        // One stop shopping for making controls that allow the player to bind to a key in game. Note you must call KeyBindings.RegisterAction with the title of this control to have this keybind fire an action. You also need to call KeyBindings.OnUpdate from your mod's OnUpdate delegate in order for ModKit to detect the keys and fire the action
-
-        // Basic Action Button with HotKey
+        // One stop shopping for making an instant button that you want to let a player bind to a key in game
         public static void BindableActionButton(string title, params GUILayoutOption[] options) {
-            BindableActionButton(title, false, options);
-        }
-        public static void BindableActionButton(string title, bool shouldLocalize = false, params GUILayoutOption[] options) {
             if (options.Length == 0) { options = new GUILayoutOption[] { GL.Width(300) }; }
-            var actionEntry = KeyBindings.GetAction(title);
-            if (GL.Button(shouldLocalize ? title.localize() : title, options)) {
-                actionEntry?.action();
-            }
+            var action = KeyBindings.GetAction(title);
+            if (GL.Button(title, options)) { action(); }
             EditKeyBind(title, true, false, Width(200));
         }
 
         // Action button designed to live in a collection with a BindableActionButton
         public static void NonBindableActionButton(string title, Action action, params GUILayoutOption[] options) {
             if (options.Length == 0) { options = new GUILayoutOption[] { GL.Width(300) }; }
-            if (GL.Button(title, options)) {
-                action();
-            }
+            if (GL.Button(title, options)) { action(); }
             Space(204);
             if (Event.current.type == EventType.Layout)
                 KeyBindings.RegisterAction(title, action);
