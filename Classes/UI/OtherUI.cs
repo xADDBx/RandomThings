@@ -13,6 +13,7 @@ namespace RandomThings {
             ActionButton("Console Test", () => UIManager.Instance.ShowMenu(FullscreenUIWindowManaged.FullscreenMenuId.DevConsole));
 #endif
             LogSlider("Time Multiplier", ref settings.TimeMultiplier, 0.00001f, 10, 1, 5, "", AutoWidth());
+            LogSlider("Loot Multiplier", ref settings.LootMultiplier, 0.00001f, 100, 1, 5, "", AutoWidth());
             if (Toggle("Activate Player Map Symbol", ref settings.showCharacterOnMap)) {
                 GameObject found = null;
                 foreach (var obj in Main.objects.Values) {

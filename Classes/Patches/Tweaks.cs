@@ -153,5 +153,31 @@ namespace RandomThings {
                 return true;
             }
         }
+        [HarmonyPatch(typeof(ResourceLootSpawner), nameof(ResourceLootSpawner.SpawnLootFromSpawnPoint))]
+        private static class ResourceLootSpawner_SpawnLootFromSpawnPoint_Patch {
+            private static bool Prefix(ResourceLootSpawner __instance, ResourceSpawnPoint point, LootSpawnSettings lootSpawnSettings) {
+                if (settings.LootMultiplier != 1.0f) {
+                    if (point.HasSpawned) {
+                        return false;
+                    }
+                    __instance.lastChainDelay = 0f;
+                    __instance.spawnedCount = 0;
+                    __instance.circularRotationStart = UnityEngine.Random.value * 360f;
+                    __instance.circularSlices = UnityEngine.Random.Range(__instance.LootCircularSlicesPerCircle.x, __instance.LootCircularSlicesPerCircle.y);
+                    __instance.circularMultiplier = UnityEngine.Random.Range(__instance.LootCircularSliceMultiplier.x, __instance.LootCircularSliceMultiplier.y);
+                    Vector3 position = point.transform.position;
+                    foreach (KeyValuePair<string, LootEntry> keyValuePair in point.Entries) {
+                        ResourceLootSpawner._spawnLootFromSpawnPoint = (int)(settings.LootMultiplier * keyValuePair.Value.SpawnCount);
+                        while (ResourceLootSpawner._spawnLootFromSpawnPoint > 0) {
+                            __instance.GenerateLootAtPoint(keyValuePair.Key, keyValuePair.Value, position, lootSpawnSettings);
+                            ResourceLootSpawner._spawnLootFromSpawnPoint--;
+                        }
+                    }
+                    point.HasSpawned = true;
+                    return false;
+                }
+                return true;
+            }
+        }
     }
 }
