@@ -1,11 +1,53 @@
 ﻿using ModKit.Utility;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
+using static ModKit.UI;
 using static ModKit.Utility.StringExtensions;
+using Object = System.Object;
 
 namespace ModKit.DataViewer {
     public class ReflectionTreeView {
+#if false
+        private static readonly ConditionalWeakTable<object, ReflectionTreeView> _cachedReflectionTrees = new() { };
+        private static void AddOrUpdateCachedReflectionTree(object key, ReflectionTreeView tree) {
+            if (_cachedReflectionTrees.TryGetValue(key, out _)) {
+                _cachedReflectionTrees.Remove(key);
+                //Mod.Log($"removing: {bp.NameSafe()}");
+            }
+            _cachedReflectionTrees.Add(key, tree);
+        }
+#endif
+        private static readonly Dictionary<object, ReflectionTreeView> ExpandedObjects = new();
+        public static void ClearExpanded() => ExpandedObjects.Clear();
+        public static void DetailToggle(string title, object key, object target = null, int width = 600) {
+            target ??= key;
+            var expanded = ExpandedObjects.ContainsKey(key);
+            if (DisclosureToggle(title, ref expanded, width)) {
+                ExpandedObjects.Clear();
+                if (expanded) {
+                    ExpandedObjects[key] = new ReflectionTreeView(target);
+                }
+            }
+        }
+        public static bool OnDetailGUI(object key, int indent = 50) {
+            ExpandedObjects.TryGetValue(key, out var reflectionTreeView);
+            if (reflectionTreeView != null) {
+                reflectionTreeView.Indent = indent;
+                using (HorizontalScope()) {
+                    Space(indent);
+                    Label("Inspecting: ".grey() + reflectionTreeView.Root.ToString().orange().bold());
+                }
+                reflectionTreeView.OnGUI(false);
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+
         private ReflectionTree _tree;
         private ReflectionSearchResult _searchResults = new ReflectionSearchResult();
         private float _height;
@@ -16,7 +58,12 @@ namespace ModKit.DataViewer {
         private int _nodesCount;
         private int _startIndex;
         private int _skipLevels;
-        private String searchText = "";
+        private string _searchText = "";
+
+        internal string[] SearchTerms => _searchText.Length == 0
+                                             ? Array.Empty<string>()
+                                             : _searchText.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+        private bool enableCopy = false;
         private int visitCount = 0;
         private int searchDepth = 0;
         private int searchBreadth = 0;
@@ -27,6 +74,8 @@ namespace ModKit.DataViewer {
         }
 
         private Rect _viewerRect;
+
+        public int Indent { get; set; } = 0;
         public float DepthDelta { get; set; } = 30f;
 
         public int MaxRows => 1000; // { get { return Main.settings.maxRows; } }
@@ -42,7 +91,9 @@ namespace ModKit.DataViewer {
 
         public void Clear() {
             _tree = null;
-            _searchResults.Clear();
+            lock (_searchResults) {
+                _searchResults.Clear();
+            }
         }
 
         public void SetRoot(object root) {
@@ -50,7 +101,9 @@ namespace ModKit.DataViewer {
                 _tree.SetRoot(root);
             else
                 _tree = new ReflectionTree(root);
-            _searchResults.Node = null;
+            lock (_searchResults) {
+                _searchResults.Node = null;
+            }
             _tree.RootNode.Expanded = ToggleState.On;
             //            ReflectionSearch.Shared.StartSearch(_tree.RootNode, searchText, updateCounts, _searchResults);
         }
@@ -59,9 +112,14 @@ namespace ModKit.DataViewer {
             if (_tree == null)
                 return;
             if (_buttonStyle == null)
-                _buttonStyle = new GUIStyle(GUI.skin.button) { alignment = TextAnchor.MiddleLeft, stretchHeight = false };
+                _buttonStyle = new GUIStyle(GUI.skin.button)
+                    { alignment = TextAnchor.MiddleLeft, stretchHeight = false };
             if (_valueStyle == null)
                 _valueStyle = new GUIStyle(GUI.skin.box) { alignment = TextAnchor.MiddleLeft, stretchHeight = false };
+            if (Event.current.type == EventType.Layout) {
+                var count = ReflectionSearch.ApplyUpdates();
+                if (count > 0) Mod.Log($"ReflectionTreeView.OnGUI - {count} Search Updates Applied");
+            }
 
             int startIndexUBound = Math.Max(0, _nodesCount - MaxRows);
 
@@ -79,12 +137,57 @@ namespace ModKit.DataViewer {
                     if (_startIndex > startIndexUBound) {
                         _startIndex = startIndexUBound;
                     }
-                } else {
+                }
+                else {
                     _startIndex = 0;
                 }
             }
             using (new GUILayout.VerticalScope()) {
                 // tool-bar
+                using (HorizontalScope()) {
+                    Space(Indent);
+                    ActionButton("Refresh", () => _tree.RootNode.SetDirty());
+                    15.space();
+                    ActionTextField(ref _searchText,
+                                    "searhText",
+                                    (text) => { },
+                                    () => {
+                                        _searchText = _searchText.Trim();
+                                        ReflectionSearch.Shared.StartSearch(_tree.RootNode,
+                                                                            SearchTerms,
+                                                                            updateCounts,
+                                                                            _searchResults);
+                                    },
+                                    Width(250));
+                    GUILayout.Space(10f);
+                    bool isSearching = ReflectionSearch.Shared.isSearching;
+                    ActionButton(isSearching ? "Stop" : "Search",
+                                 () => {
+                                     if (isSearching) {
+                                         ReflectionSearch.Shared.Stop();
+                                     }
+                                     else {
+                                         _searchText = _searchText.Trim();
+                                         ReflectionSearch.Shared.StartSearch(_tree.RootNode,
+                                                                             SearchTerms,
+                                                                             updateCounts,
+                                                                             _searchResults);
+                                     }
+                                 },
+                                 AutoWidth());
+                    10.space();
+                    if (ValueAdjuster("Max Depth:", ref ReflectionSearch.maxSearchDepth)) {
+                        ReflectionSearch.Shared.StartSearch(_tree.RootNode, SearchTerms, updateCounts, _searchResults);
+                    }
+                    10.space();
+                    if (visitCount > 0) {
+                        Label($"found {_searchResults.Count}".Cyan()
+                              + $" visited: {visitCount} (d: {searchDepth} b: {searchBreadth})".Orange());
+                    }
+                    GUILayout.FlexibleSpace();
+                    //                  10.space();
+                    //                    Toggle("Enable Value Selection For Copy", ref enableCopy);
+                }
 #if false
                 using (new GUILayout.HorizontalScope()) {
                     if (GUILayout.Button("Collapse", GUILayout.ExpandWidth(false))) {
@@ -100,7 +203,8 @@ namespace ModKit.DataViewer {
                     GUILayout.Space(10f);
 #if false
                     GUILayout.Label("Title Width:", GUILayout.ExpandWidth(false));
-                    TitleMinWidth = GUILayout.HorizontalSlider(TitleMinWidth, 0f, Screen.width / 2, GUILayout.Width(100f));
+                    TitleMinWidth =
+ GUILayout.HorizontalSlider(TitleMinWidth, 0f, Screen.width / 2, GUILayout.Width(100f));
 
                     GUILayout.Space(10f);
 #endif
@@ -133,52 +237,65 @@ namespace ModKit.DataViewer {
                 }
 #endif
                 // view
-                using (new GUILayout.VerticalScope()) {
-                    //                    using (new GUILayout.ScrollViewScope(new Vector2(), GUIStyle.none, GUIStyle.none, GUILayout.Height(_height))) {
-                    using (new GUILayout.HorizontalScope(GUI.skin.box)) {
-                        // nodes
-                        using (new GUILayout.VerticalScope()) {
-                            _nodesCount = 0;
-                            if (searchText.Length > 0) {
-                                _searchResults.Traverse((node, depth) => {
-                                    var toggleState = node.ToggleState;
-                                    if (!node.Node.hasChildren)
-                                        toggleState = ToggleState.None;
-                                    else if (node.ToggleState == ToggleState.None)
-                                        toggleState = ToggleState.Off;
-                                    if (node.Node.NodeType == NodeType.Root) {
-                                        if (node.matches.Count == 0) return false;
-                                        GUILayout.Label("Search Results".Cyan().Bold());
-                                    } else
-                                        DrawNodePrivate(node.Node, depth, ref toggleState);
-                                    if (node.ToggleState != toggleState) { Mod.Log(node.ToString()); }
-                                    node.ToggleState = toggleState;
-                                    if (toggleState.IsOn()) {
-                                        DrawChildren(node.Node, depth + 1, collapse);
+                using (VerticalScope()) {
+                    using (HorizontalScope()) {
+                        Space(Indent);
+                        using (VerticalScope()) {
+                            //                    using (new GUILayout.ScrollViewScope(new Vector2(), GUIStyle.none, GUIStyle.none, GUILayout.Height(_height))) {
+                            using (HorizontalScope(GUI.skin.box)) {
+                                // nodes
+                                using (new GUILayout.VerticalScope()) {
+                                    _nodesCount = 0;
+                                    if (SearchTerms.Length > 0) {
+                                        Div();
+                                        lock (_searchResults) {
+                                            _searchResults.Traverse((node, depth) => {
+                                                if (node.Node == null) return true;
+                                                var toggleState = node.ToggleState;
+                                                if (!node.Node.hasChildren)
+                                                    toggleState = ToggleState.None;
+                                                else if (node.ToggleState == ToggleState.None)
+                                                    toggleState = ToggleState.Off;
+                                                if (node.Node.NodeType == NodeType.Root) {
+                                                    if (node.matches.Count == 0) return false;
+                                                    Label("Search Results".Cyan().Bold());
+                                                }
+                                                else
+                                                    DrawNodePrivate(node.Node, depth, ref toggleState);
+                                                if (node.ToggleState != toggleState) {
+                                                    Mod.Log(node.ToString());
+                                                }
+                                                node.ToggleState = toggleState;
+                                                if (toggleState.IsOn()) {
+                                                    DrawChildren(node.Node, depth + 1, collapse);
+                                                }
+                                                return true; // toggleState == ToggleState.On;
+                                            }, 0);
+                                        }
+                                        Div();
                                     }
-                                    return true; // toggleState == ToggleState.On;
-                                }, 0);
+                                    if (drawRoot)
+                                        DrawNode(_tree.RootNode, 0, collapse);
+                                    else
+                                        DrawChildren(_tree.RootNode, 0, collapse);
+                                }
+
+                                // scrollbar
+                                //                            if (startIndexUBound > 0)
+                                //                            _startIndex = (int)GUILayout.VerticalScrollbar(_startIndex, MaxRows, 0f, Math.Max(MaxRows, _totalNodeCount), GUILayout.ExpandHeight(true));
                             }
-                            if (drawRoot)
-                                DrawNode(_tree.RootNode, 0, collapse);
-                            else
-                                DrawChildren(_tree.RootNode, 0, collapse);
+
+                            // cache height
+                            if (Event.current.type == EventType.Repaint) {
+                                var mousePos = Event.current.mousePosition;
+                                _mouseOver = _viewerRect.Contains(Event.current.mousePosition);
+                                //Main.Log($"mousePos: {mousePos} Rect: {_viewerRect} --> {_mouseOver}");
+                                _viewerRect = GUILayoutUtility.GetLastRect();
+                                _height = _viewerRect.height + 5f;
+                            }
+                            //                  }
                         }
-
-                        // scrollbar
-                        //                            if (startIndexUBound > 0)
-                        //                            _startIndex = (int)GUILayout.VerticalScrollbar(_startIndex, MaxRows, 0f, Math.Max(MaxRows, _totalNodeCount), GUILayout.ExpandHeight(true));
                     }
-
-                    // cache height
-                    if (Event.current.type == EventType.Repaint) {
-                        var mousePos = Event.current.mousePosition;
-                        _mouseOver = _viewerRect.Contains(Event.current.mousePosition);
-                        //Main.Log($"mousePos: {mousePos} Rect: {_viewerRect} --> {_mouseOver}");
-                        _viewerRect = GUILayoutUtility.GetLastRect();
-                        _height = _viewerRect.height + 5f;
-                    }
-                    //                  }
                 }
             }
         }
@@ -187,16 +304,17 @@ namespace ModKit.DataViewer {
 
             if (_nodesCount > _startIndex && _nodesCount <= _startIndex + MaxRows) {
 
-                using (new GUILayout.HorizontalScope()) {
+                using (HorizontalScope()) {
                     // title
-                    GUILayout.Space(DepthDelta * (depth - _skipLevels));
+                    Space(DepthDelta * (depth - _skipLevels));
                     var name = node.Name;
                     var instText = "";  // if (node.InstanceID is int instID) instText = "@" + instID.ToString();
-                    name = name.MarkedSubstring(searchText);
+                    name = name.MarkedSubstring(SearchTerms);
                     var enumerableCount = node.EnumerableCount;
+                    if (enumerableCount == 0 || node.IsNull) return; // TODO - make this a config option
                     if (enumerableCount >= 0) name = name + $"[{enumerableCount}]".yellow();
                     var typeName = node.InstType?.Name ?? node.Type?.Name;
-                    UI.ToggleButton(ref expanded,
+                    ToggleButton(ref expanded,
                         $"[{node.NodeTypePrefix}] ".color(RGBA.grey) +
                         name + " : " + typeName.color(
                             node.IsBaseType ? RGBA.grey :
@@ -208,12 +326,26 @@ namespace ModKit.DataViewer {
                     // value
                     Color originalColor = GUI.contentColor;
                     GUI.contentColor = node.IsException ? Color.red : node.IsNull ? Color.grey : originalColor;
-                    GUILayout.TextArea(node.ValueText.MarkedSubstring(searchText)); // + " " + node.GetPath().green(), _valueStyle);
+                    var valueText = node.ValueText;
+                    if (SearchTerms.Length == 0 || !SearchTerms.Any(term => valueText.Matches(term)))
+                        ClipboardLabel(valueText); // + " " + node.GetPath().green(), _valueStyle);
+                    else {
+                        //if (valueText.Matches("mor"))
+                        //    Mod.Log($"{valueText}/[{string.Join(", ", SearchTerms)}]");
+                        Label(valueText.MarkedSubstring(SearchTerms), ExpandWidth(true));
+                    }
                     GUI.contentColor = originalColor;
 
                     // instance type
-                    if (node.InstType != null && node.InstType != node.Type)
-                        GUILayout.Label(node.InstType.Name.color(RGBA.yellow), _buttonStyle, GUILayout.ExpandWidth(false));
+                    var text = "";
+                    var style = GUI.skin.label;
+                    if (node.InstType != null && node.InstType != node.Type) {
+                        text = node.InstType.Name.color(RGBA.yellow);
+                        style = _buttonStyle;
+                        Label(text, _buttonStyle, GUILayout.ExpandWidth(false));
+                    }
+                    else 
+                        Label("", ExpandWidth(false));
                 }
             }
         }

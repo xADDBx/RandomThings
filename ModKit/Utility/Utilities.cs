@@ -8,7 +8,7 @@ using System.Text.RegularExpressions;
 
 namespace ModKit
 {
-    public static class Utilties
+    public static class Utilities
     {
         public static TValue GetValueOrDefault<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key, TValue defaultValue = default)
         {
@@ -16,6 +16,20 @@ namespace ModKit
             if (key == null) { throw new ArgumentNullException(nameof(key)); } //  using C# 6
 
             return dictionary.TryGetValue(key, out var value) ? value : defaultValue;
+        }
+        public static Dictionary<TKey, TElement> ToDictionaryIgnoringDuplicates<TSource, TKey, TElement>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, IEqualityComparer<TKey> comparer = null) {
+            if (source == null)
+                throw new ArgumentException("source");
+            if (keySelector == null)
+                throw new ArgumentException("keySelector");
+            if (elementSelector == null)
+                throw new ArgumentException("elementSelector");
+            Dictionary<TKey, TElement> d = new Dictionary<TKey, TElement>(comparer);
+            foreach (TSource element in source) {
+                if (!d.ContainsKey(keySelector(element)))
+                    d.Add(keySelector(element), elementSelector(element));
+            }
+            return d;
         }
         public static object GetPropValue(this object obj, string name)
         {
@@ -196,7 +210,98 @@ namespace ModKit
                 .ToDictionary(e => e, e => Enum.GetName(enumType, e));
         }
         public static Dictionary<K, V> Filter<K, V>(this Dictionary<K, V> dict,
-        Predicate<KeyValuePair<K, V>> pred) => dict.Where(it => pred(it)).ToDictionary(it => it.Key, it => it.Value);
+        Predicate<KeyValuePair<K, V>> predicate) => dict.Where(it => predicate(it)).ToDictionary(it => it.Key, it => it.Value);
+        public static List<List<T>> Partition<T>(this List<T> values, int chunkSize) {
+            return values.Select((x, i) => new { Index = i, Value = x })
+                         .GroupBy(x => x.Index / chunkSize)
+                         .Select(x => x.Select(v => v.Value).ToList())
+                         .ToList();
+        }
+         public static List<List<T>> BuildChunksWithIteration<T>(this List<T> fullList, int batchSize) {
+            var chunkedList = new List<List<T>>();
+            var temporary = new List<T>();
+            for (int i = 0; i < fullList.Count; i++) {
+                //Mod.Log($"{i}/{fullList.Count}");
+                var e = fullList[i];
+                if (temporary.Count < batchSize) {
+                    temporary.Add(e);
+                }
+                else {
+                    //Mod.Log("new row");
+                    chunkedList.Add(temporary);
+                    temporary = new List<T>() { e };
+                }
+
+                if (i == fullList.Count - 1) {
+                    //Mod.Log("last row");
+                    chunkedList.Add(temporary);
+                }
+            }
+            //Mod.Log($"result - rows: {chunkedList.Count}");
+            return chunkedList;
+        }
+        // Chunk
+        public static IEnumerable<TSource[]> Chunk<TSource>(this IEnumerable<TSource> source, int size) {
+            if (source == null) {
+                throw new ArgumentNullException("source");
+                // ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
+            }
+
+            if (size < 1) {
+                throw new ArgumentOutOfRangeException("size < 1");
+                // ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.size);
+            }
+
+            return ChunkIterator(source, size);
+        }
+
+        private static IEnumerable<TSource[]> ChunkIterator<TSource>(IEnumerable<TSource> source, int size) {
+            using IEnumerator<TSource> e = source.GetEnumerator();
+
+            // Before allocating anything, make sure there's at least one element.
+            if (e.MoveNext()) {
+                // Now that we know we have at least one item, allocate an initial storage array. This is not
+                // the array we'll yield.  It starts out small in order to avoid significantly overallocating
+                // when the source has many fewer elements than the chunk size.
+                int arraySize = Math.Min(size, 4);
+                int i;
+                do {
+                    var array = new TSource[arraySize];
+
+                    // Store the first item.
+                    array[0] = e.Current;
+                    i = 1;
+
+                    if (size != array.Length) {
+                        // This is the first chunk. As we fill the array, grow it as needed.
+                        for (; i < size && e.MoveNext(); i++) {
+                            if (i >= array.Length) {
+                                arraySize = (int)Math.Min((uint)size, 2 * (uint)array.Length);
+                                Array.Resize(ref array, arraySize);
+                            }
+
+                            array[i] = e.Current;
+                        }
+                    }
+                    else {
+                        // For all but the first chunk, the array will already be correctly sized.
+                        // We can just store into it until either it's full or MoveNext returns false.
+                        TSource[] local = array; // avoid bounds checks by using cached local (`array` is lifted to iterator object as a field)
+                        //Debug.Assert(local.Length == size);
+                        for (; (uint)i < (uint)local.Length && e.MoveNext(); i++) {
+                            local[i] = e.Current;
+                        }
+                    }
+
+                    if (i != array.Length) {
+                        Array.Resize(ref array, i);
+                    }
+
+                    yield return array;
+                }
+                while (i >= size && e.MoveNext());
+            }
+        }
     }
     public static class MK
     {
