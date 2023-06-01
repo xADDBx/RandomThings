@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using Assets.Utils;
+using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -182,6 +183,21 @@ namespace RandomThings {
                     return false;
                 }
                 return true;
+            }
+        }
+        [HarmonyPatch(typeof(Menu_Import.ImportResource), MethodType.Constructor, new Type[] { typeof(string), typeof(int) })]
+        private static class Menu_Import_ImportResource_Patch {
+            private static void Postfix(Menu_Import.ImportResource __instance) {
+                if (settings.ImportMultiplier != 1.0f || (settings.useFineImportMultiplier && settings.fineImportMultiplier.Any(kv => kv.Value != 1.0f))) {
+                    if (!settings.useFineImportMultiplier) {
+                        __instance.Amount = (int)(__instance.Amount * settings.ImportMultiplier);
+                    } else {
+                        var resName = SingletonBehaviour<ResourceFactory>.Instance.GetResourcePrefab(__instance.ResourceUID).Name;
+                        if (settings.fineImportMultiplier.ContainsKey(resName)) {
+                            __instance.Amount = (int)(__instance.Amount * settings.fineImportMultiplier[resName]);
+                        }
+                    }
+                }
             }
         }
     }

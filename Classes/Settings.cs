@@ -9,8 +9,11 @@ namespace RandomThings {
         public int selectedRawDataType = 0;
         public float TimeMultiplier = 1f;
         public float LootMultiplier = 1f;
+        public float ImportMultiplier = 1f;
+        public bool useFineImportMultiplier = false;
         public bool useFineLootMultiplier = false;
         public SerializableDictionary<ResourceSourceVariants, float> fineLootMultipliers = newMultDict();
+        public SerializableDictionary<string, float> fineImportMultiplier = new();
         public int selectedTab = 0;
         public int saveGameChainFileCap = 10;
         public int maxChestStackSize = 50;
@@ -22,6 +25,7 @@ namespace RandomThings {
         public bool enableInvulnerability = false;
         public bool enableEverythingCostsNothing = false;
         public bool showCharacterOnMap = false;
+
         public override void Save(UnityModManager.ModEntry modEntry) {
             Save(this, modEntry);
         }

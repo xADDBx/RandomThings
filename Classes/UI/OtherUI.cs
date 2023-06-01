@@ -1,4 +1,5 @@
-﻿using ModKit.Utility;
+﻿using Assets.Utils;
+using ModKit.Utility;
 using System;
 using UnityEngine;
 using static ModKit.UI;
@@ -9,7 +10,8 @@ namespace RandomThings {
         public static Settings settings => Main.settings;
         static bool showGameStats = false;
         static bool showDangerous = false;
-        static bool showMultiplier = false;
+        static bool showLootMultiplier = false;
+        static bool showImportMultiplier = false;
         public static void OnGUI() {
 #if DEBUG
             // Opens Console; Console does nothing
@@ -17,9 +19,9 @@ namespace RandomThings {
 #endif
             LogSlider("Time Multiplier", ref settings.TimeMultiplier, 0.00001f, 10, 1, 5, "", AutoWidth());
             LogSlider("Loot Multiplier", ref settings.LootMultiplier, 0.00001f, 100, 1, 5, "", AutoWidth());
-            Toggle("Use Item Specific Use Multipliers", ref settings.useFineLootMultiplier);
-            DisclosureToggle("Item Loot Multiplier", ref showMultiplier);
-            if (showMultiplier) {
+            Toggle("Use Item Specific Loot Multipliers", ref settings.useFineLootMultiplier);
+            DisclosureToggle("Item Loot Multiplier", ref showLootMultiplier);
+            if (showLootMultiplier) {
                 using (HorizontalScope()) {
                     Space(10);
                     using (VerticalScope()) {
@@ -27,6 +29,26 @@ namespace RandomThings {
                             float tmp = settings.fineLootMultipliers[res];
                             if (LogSlider($"{res} Loot Multiplier", ref tmp, 0.00001f, 100, 1, 5, "", AutoWidth())) {
                                 settings.fineLootMultipliers[res] = tmp;
+                            }
+                        }
+                    }
+                }
+            }
+            LogSlider("Import Multiplier", ref settings.ImportMultiplier, 0.00001f, 10, 1, 5, "", AutoWidth());
+            Toggle("Use Item Specific Import Multiplier", ref settings.useFineImportMultiplier);
+            DisclosureToggle("Import Loot Multiplier", ref showImportMultiplier);
+            if (showImportMultiplier) {
+                using (HorizontalScope()) {
+                    Space(10);
+                    using (VerticalScope()) {
+                        foreach (var UID in SingletonBehaviour<InvestmentManager>.Instance.GetUnlockedImports().Keys) {
+                            var resName = SingletonBehaviour<ResourceFactory>.Instance.GetResourcePrefab(UID).Name;
+                            if (!settings.fineImportMultiplier.ContainsKey(resName)) {
+                                settings.fineImportMultiplier[resName] = 1.0f;
+                            }
+                            float tmp2 = settings.fineImportMultiplier[resName];
+                            if (LogSlider($"{resName} Import Multiplier", ref tmp2, 0.00001f, 100, 1, 5, "", AutoWidth())) {
+                                settings.fineImportMultiplier[resName] = tmp2;
                             }
                         }
                     }
