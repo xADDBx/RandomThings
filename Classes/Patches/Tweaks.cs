@@ -1,7 +1,9 @@
 ﻿using Assets.Utils;
 using HarmonyLib;
+using ModKit.Utility;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
@@ -185,20 +187,28 @@ namespace RandomThings {
                 return true;
             }
         }
-        [HarmonyPatch(typeof(Menu_Import.ImportResource), MethodType.Constructor, new Type[] { typeof(string), typeof(int) })]
-        private static class Menu_Import_ImportResource_Patch {
-            private static void Postfix(Menu_Import.ImportResource __instance) {
+#if false
+        [HarmonyPatch(typeof(InvestmentManager), nameof(InvestmentManager.GetResourceImportMaxAmount))]
+        private static class InvestmentManager_GetResourceImportMaxAmount_Patch {
+            private static void Postfix(ref int __result) {
                 if (settings.ImportMultiplier != 1.0f || (settings.useFineImportMultiplier && settings.fineImportMultiplier.Any(kv => kv.Value != 1.0f))) {
                     if (!settings.useFineImportMultiplier) {
-                        __instance.Amount = (int)(__instance.Amount * settings.ImportMultiplier);
+                        __result = (int)(__result * settings.ImportMultiplier);
                     } else {
-                        var resName = SingletonBehaviour<ResourceFactory>.Instance.GetResourcePrefab(__instance.ResourceUID).Name;
+                        var resName = SingletonBehaviour<ResourceFactory>.Instance.GetResourcePrefab(resourceUID).Name;
                         if (settings.fineImportMultiplier.ContainsKey(resName)) {
-                            __instance.Amount = (int)(__instance.Amount * settings.fineImportMultiplier[resName]);
+                            __result = (int)(__result * settings.fineImportMultiplier[resName]);
+                        }
+                        StackTrace stackTrace = new();
+                        foreach (var stuff in stackTrace.GetFrame(1).GetMethod().GetMethodBody().LocalVariables) {
+                            Main.Mod.Log($"{stuff}");
+                            Menu_Import Menu_Import_Window = UIManager._instance._menus[FullscreenUIWindowManaged.FullscreenMenuId.ImportMenu] as Menu_Import;
+                            Menu_Import_Window.UpdateElements();
                         }
                     }
                 }
             }
         }
+#endif
     }
 }

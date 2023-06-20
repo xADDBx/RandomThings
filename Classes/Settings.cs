@@ -9,11 +9,13 @@ namespace RandomThings {
         public int selectedRawDataType = 0;
         public float TimeMultiplier = 1f;
         public float LootMultiplier = 1f;
-        public float ImportMultiplier = 1f;
-        public bool useFineImportMultiplier = false;
         public bool useFineLootMultiplier = false;
         public SerializableDictionary<ResourceSourceVariants, float> fineLootMultipliers = newMultDict();
+#if false
+        public float ImportMultiplier = 1f;
+        public bool useFineImportMultiplier = false;
         public SerializableDictionary<string, float> fineImportMultiplier = new();
+#endif
         public int selectedTab = 0;
         public int saveGameChainFileCap = 10;
         public int maxChestStackSize = 50;

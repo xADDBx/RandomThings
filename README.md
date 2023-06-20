@@ -38,6 +38,9 @@
   * **Or** replace every reference to the variable in the .csproj file with the path. I don't really recommend doing that.
 * Now you should be able to build the project without problems. If you still encounter trouble please contact me on Discord or create a GitHub issue.
 
+# v0.3.0
+* Updated for Game Update 2.
+* Removed import multiply because said update reworked import system.
 # v0.2.2
 * Added Sliders to multiply import capacity for specific item types or in general.
 # v0.2.1

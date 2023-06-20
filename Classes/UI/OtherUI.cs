@@ -34,6 +34,7 @@ namespace RandomThings {
                     }
                 }
             }
+#if false
             LogSlider("Import Multiplier", ref settings.ImportMultiplier, 0.00001f, 10, 1, 5, "", AutoWidth());
             Toggle("Use Item Specific Import Multiplier", ref settings.useFineImportMultiplier);
             DisclosureToggle("Import Loot Multiplier", ref showImportMultiplier);
@@ -54,6 +55,7 @@ namespace RandomThings {
                     }
                 }
             }
+#endif
             Toggle("Make everything free (Resources + Money)", ref settings.enableEverythingCostsNothing);
             Toggle("Make player invulnerable", ref settings.enableInvulnerability);
             if (MainGameScript.Instance.PlayerAvatar.IsInvulnerable != settings.enableInvulnerability) {
